@@ -47,5 +47,5 @@ public class Consultation {
     private Integer physiotherapistId;
 
     @Column(name = "patient_id")
-    private Integer patientId;
+    private Integer patientIdd;
 }

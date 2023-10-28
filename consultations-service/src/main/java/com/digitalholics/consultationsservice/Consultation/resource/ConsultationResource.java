@@ -1,7 +1,7 @@
 package com.digitalholics.consultationsservice.Consultation.resource;
 
-import com.digitalholics.consultationsservice.Consultation.resource.Patient.PatientResource;
-import com.digitalholics.consultationsservice.Consultation.resource.Physiotherapist.PhysiotherapistResource;
+import com.digitalholics.consultationsservice.Consultation.resource.External.PatientResource;
+import com.digitalholics.consultationsservice.Consultation.resource.External.PhysiotherapistResource;
 
 import lombok.*;
 

@@ -1,4 +1,4 @@
-package com.digitalholics.profileservice.Profile.domain.model.entity.ExternalEntities;
+package com.digitalholics.consultationsservice.Consultation.domain.model.entity.External;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -8,8 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.digitalholics.profileservice.Profile.domain.model.entity.ExternalEntities.Permission.*;
-
+import static com.digitalholics.consultationsservice.Consultation.domain.model.entity.External.Permission.*;
 
 @Getter
 @RequiredArgsConstructor

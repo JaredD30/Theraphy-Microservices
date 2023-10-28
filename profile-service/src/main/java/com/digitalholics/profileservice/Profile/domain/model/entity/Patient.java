@@ -1,6 +1,6 @@
 package com.digitalholics.profileservice.Profile.domain.model.entity;
 
-import com.digitalholics.profileservice.Profile.domain.model.entity.ExternalEntities.User;
+import com.digitalholics.profileservice.Profile.domain.model.entity.External.User;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;

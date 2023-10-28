@@ -1,4 +1,4 @@
-package com.digitalholics.profileservice.Profile.resource;
+package com.digitalholics.profileservice.Profile.resource.External;
 
 import lombok.Getter;
 import lombok.Setter;

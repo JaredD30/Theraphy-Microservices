@@ -2,13 +2,13 @@ package com.digitalholics.consultationsservice.Consultation.service;
 
 
 import com.digitalholics.consultationsservice.Consultation.domain.model.entity.Consultation;
-import com.digitalholics.consultationsservice.Consultation.domain.model.entity.ExternalEntities.Patient;
-import com.digitalholics.consultationsservice.Consultation.domain.model.entity.ExternalEntities.Physiotherapist;
-import com.digitalholics.consultationsservice.Consultation.domain.model.entity.ExternalEntities.User;
+import com.digitalholics.consultationsservice.Consultation.domain.model.entity.External.Patient;
+import com.digitalholics.consultationsservice.Consultation.domain.model.entity.External.Physiotherapist;
+import com.digitalholics.consultationsservice.Consultation.domain.model.entity.External.User;
 import com.digitalholics.consultationsservice.Consultation.domain.persistence.ConsultationRepository;
-import com.digitalholics.consultationsservice.Consultation.domain.persistence.PatientRepository;
-import com.digitalholics.consultationsservice.Consultation.domain.persistence.PhysiotherapistRepository;
-import com.digitalholics.consultationsservice.Consultation.domain.persistence.UserRepository;
+import com.digitalholics.consultationsservice.Consultation.domain.persistence.External.PatientRepository;
+import com.digitalholics.consultationsservice.Consultation.domain.persistence.External.PhysiotherapistRepository;
+import com.digitalholics.consultationsservice.Consultation.domain.persistence.External.UserRepository;
 import com.digitalholics.consultationsservice.Consultation.domain.service.ConsultationService;
 
 import com.digitalholics.consultationsservice.Consultation.resource.CreateConsultationResource;

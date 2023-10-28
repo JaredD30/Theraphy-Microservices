@@ -1,7 +1,7 @@
-package com.digitalholics.profileservice.Profile.domain.persistence;
+package com.digitalholics.profileservice.Profile.domain.persistence.External;
 
 
-import com.digitalholics.profileservice.Profile.domain.model.entity.ExternalEntities.User;
+import com.digitalholics.profileservice.Profile.domain.model.entity.External.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

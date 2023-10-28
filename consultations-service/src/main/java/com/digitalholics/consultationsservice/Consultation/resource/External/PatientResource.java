@@ -1,6 +1,6 @@
-package com.digitalholics.consultationsservice.Consultation.resource.Patient;
+package com.digitalholics.consultationsservice.Consultation.resource.External;
 
-import com.digitalholics.consultationsservice.Consultation.resource.UserResource;
+import com.digitalholics.consultationsservice.Consultation.resource.External.UserResource;
 import lombok.*;
 
 @Getter

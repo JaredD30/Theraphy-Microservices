@@ -1,10 +1,10 @@
 package com.digitalholics.profileservice.Profile.service;
 
 
-import com.digitalholics.profileservice.Profile.domain.model.entity.ExternalEntities.User;
+import com.digitalholics.profileservice.Profile.domain.model.entity.External.User;
 import com.digitalholics.profileservice.Profile.domain.model.entity.Patient;
 import com.digitalholics.profileservice.Profile.domain.persistence.PatientRepository;
-import com.digitalholics.profileservice.Profile.domain.persistence.UserRepository;
+import com.digitalholics.profileservice.Profile.domain.persistence.External.UserRepository;
 import com.digitalholics.profileservice.Profile.domain.service.PatientService;
 import com.digitalholics.profileservice.Profile.resource.Patient.CreatePatientResource;
 import com.digitalholics.profileservice.Profile.resource.Patient.UpdatePatientResource;

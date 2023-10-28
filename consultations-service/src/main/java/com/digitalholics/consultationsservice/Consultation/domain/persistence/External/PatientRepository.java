@@ -1,7 +1,7 @@
-package com.digitalholics.consultationsservice.Consultation.domain.persistence;
+package com.digitalholics.consultationsservice.Consultation.domain.persistence.External;
 
 
-import com.digitalholics.consultationsservice.Consultation.domain.model.entity.ExternalEntities.Patient;
+import com.digitalholics.consultationsservice.Consultation.domain.model.entity.External.Patient;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,4 +1,4 @@
-package com.digitalholics.consultationsservice.Consultation.domain.model.entity.ExternalEntities;
+package com.digitalholics.consultationsservice.Consultation.domain.model.entity.External;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;

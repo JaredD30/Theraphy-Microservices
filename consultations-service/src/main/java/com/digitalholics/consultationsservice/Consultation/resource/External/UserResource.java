@@ -1,4 +1,4 @@
-package com.digitalholics.consultationsservice.Consultation.resource;
+package com.digitalholics.consultationsservice.Consultation.resource.External;
 
 import lombok.Getter;
 import lombok.Setter;

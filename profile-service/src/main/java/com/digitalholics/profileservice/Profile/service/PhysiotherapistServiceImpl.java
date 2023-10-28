@@ -1,12 +1,12 @@
 package com.digitalholics.profileservice.Profile.service;
 
 
-import com.digitalholics.profileservice.Profile.domain.model.entity.ExternalEntities.User;
+import com.digitalholics.profileservice.Profile.domain.model.entity.External.User;
 import com.digitalholics.profileservice.Profile.domain.model.entity.Patient;
 import com.digitalholics.profileservice.Profile.domain.model.entity.Physiotherapist;
 import com.digitalholics.profileservice.Profile.domain.persistence.PatientRepository;
 import com.digitalholics.profileservice.Profile.domain.persistence.PhysiotherapistRepository;
-import com.digitalholics.profileservice.Profile.domain.persistence.UserRepository;
+import com.digitalholics.profileservice.Profile.domain.persistence.External.UserRepository;
 import com.digitalholics.profileservice.Profile.domain.service.PhysiotherapistService;
 import com.digitalholics.profileservice.Profile.resource.Physiotherapist.CreatePhysiotherapistResource;
 import com.digitalholics.profileservice.Profile.resource.Physiotherapist.UpdatePhysiotherapistResource;

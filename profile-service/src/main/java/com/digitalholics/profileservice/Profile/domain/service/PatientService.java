@@ -1,8 +1,8 @@
 package com.digitalholics.profileservice.Profile.domain.service;
 
 
+import com.digitalholics.profileservice.Profile.domain.model.entity.ExternalEntities.User;
 import com.digitalholics.profileservice.Profile.domain.model.entity.Patient;
-import com.digitalholics.profileservice.Profile.domain.model.entity.User.User;
 import com.digitalholics.profileservice.Profile.resource.Patient.CreatePatientResource;
 import com.digitalholics.profileservice.Profile.resource.Patient.UpdatePatientResource;
 import org.springframework.data.domain.Page;

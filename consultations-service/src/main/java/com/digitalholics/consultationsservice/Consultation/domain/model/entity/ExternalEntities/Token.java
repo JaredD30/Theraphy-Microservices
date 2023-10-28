@@ -1,4 +1,4 @@
-package com.digitalholics.consultationsservice.Consultation.domain.model.entity.User;
+package com.digitalholics.consultationsservice.Consultation.domain.model.entity.ExternalEntities;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

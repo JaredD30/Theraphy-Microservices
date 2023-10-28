@@ -1,7 +1,7 @@
 package com.digitalholics.profileservice.Profile.resource.Physiotherapist;
 
 
-import com.digitalholics.profileservice.Profile.resource.User.UserResource;
+import com.digitalholics.profileservice.Profile.resource.UserResource;
 import lombok.*;
 
 @Getter

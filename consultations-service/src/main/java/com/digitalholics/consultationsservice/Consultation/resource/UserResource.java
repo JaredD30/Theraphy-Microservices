@@ -1,4 +1,4 @@
-package com.digitalholics.profileservice.Profile.resource.User;
+package com.digitalholics.consultationsservice.Consultation.resource;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -1,9 +1,7 @@
 package com.digitalholics.profileservice.Profile.domain.service;
 
 
-import com.digitalholics.profileservice.Profile.domain.model.entity.Patient;
 import com.digitalholics.profileservice.Profile.domain.model.entity.Physiotherapist;
-import com.digitalholics.profileservice.Profile.domain.model.entity.User.User;
 import com.digitalholics.profileservice.Profile.resource.Physiotherapist.CreatePhysiotherapistResource;
 import com.digitalholics.profileservice.Profile.resource.Physiotherapist.UpdatePhysiotherapistResource;
 import org.springframework.data.domain.Page;

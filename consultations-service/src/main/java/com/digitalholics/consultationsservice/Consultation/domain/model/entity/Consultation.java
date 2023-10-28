@@ -2,6 +2,8 @@ package com.digitalholics.consultationsservice.Consultation.domain.model.entity;
 
 
 
+import com.digitalholics.consultationsservice.Consultation.domain.model.entity.ExternalEntities.Patient;
+import com.digitalholics.consultationsservice.Consultation.domain.model.entity.ExternalEntities.Physiotherapist;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;

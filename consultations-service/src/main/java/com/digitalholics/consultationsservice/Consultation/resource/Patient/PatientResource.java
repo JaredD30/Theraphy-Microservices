@@ -1,6 +1,6 @@
 package com.digitalholics.consultationsservice.Consultation.resource.Patient;
 
-import com.digitalholics.consultationsservice.Consultation.resource.User.UserResource;
+import com.digitalholics.consultationsservice.Consultation.resource.UserResource;
 import lombok.*;
 
 @Getter

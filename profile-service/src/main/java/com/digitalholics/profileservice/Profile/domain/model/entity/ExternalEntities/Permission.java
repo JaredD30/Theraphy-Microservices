@@ -1,4 +1,4 @@
-package com.digitalholics.profileservice.Profile.domain.model.entity.User;
+package com.digitalholics.profileservice.Profile.domain.model.entity.ExternalEntities;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

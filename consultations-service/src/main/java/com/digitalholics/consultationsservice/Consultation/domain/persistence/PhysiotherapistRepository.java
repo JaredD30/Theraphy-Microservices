@@ -1,7 +1,7 @@
 package com.digitalholics.consultationsservice.Consultation.domain.persistence;
 
 
-import com.digitalholics.consultationsservice.Consultation.domain.model.entity.Physiotherapist;
+import com.digitalholics.consultationsservice.Consultation.domain.model.entity.ExternalEntities.Physiotherapist;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

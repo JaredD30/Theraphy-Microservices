@@ -1,9 +1,8 @@
 package com.digitalholics.profileservice.Profile.service;
 
 
+import com.digitalholics.profileservice.Profile.domain.model.entity.ExternalEntities.User;
 import com.digitalholics.profileservice.Profile.domain.model.entity.Patient;
-import com.digitalholics.profileservice.Profile.domain.model.entity.User.Role;
-import com.digitalholics.profileservice.Profile.domain.model.entity.User.User;
 import com.digitalholics.profileservice.Profile.domain.persistence.PatientRepository;
 import com.digitalholics.profileservice.Profile.domain.persistence.UserRepository;
 import com.digitalholics.profileservice.Profile.domain.service.PatientService;
@@ -11,10 +10,7 @@ import com.digitalholics.profileservice.Profile.resource.Patient.CreatePatientRe
 import com.digitalholics.profileservice.Profile.resource.Patient.UpdatePatientResource;
 import com.digitalholics.profileservice.Shared.Exception.ResourceNotFoundException;
 import com.digitalholics.profileservice.Shared.Exception.ResourceValidationException;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import jakarta.ws.rs.NotFoundException;
-import org.modelmapper.internal.bytebuddy.asm.Advice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,9 +18,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 

@@ -2,9 +2,9 @@ package com.digitalholics.consultationsservice.Consultation.service;
 
 
 import com.digitalholics.consultationsservice.Consultation.domain.model.entity.Consultation;
-import com.digitalholics.consultationsservice.Consultation.domain.model.entity.Patient;
-import com.digitalholics.consultationsservice.Consultation.domain.model.entity.Physiotherapist;
-import com.digitalholics.consultationsservice.Consultation.domain.model.entity.User.User;
+import com.digitalholics.consultationsservice.Consultation.domain.model.entity.ExternalEntities.Patient;
+import com.digitalholics.consultationsservice.Consultation.domain.model.entity.ExternalEntities.Physiotherapist;
+import com.digitalholics.consultationsservice.Consultation.domain.model.entity.ExternalEntities.User;
 import com.digitalholics.consultationsservice.Consultation.domain.persistence.ConsultationRepository;
 import com.digitalholics.consultationsservice.Consultation.domain.persistence.PatientRepository;
 import com.digitalholics.consultationsservice.Consultation.domain.persistence.PhysiotherapistRepository;
@@ -29,7 +29,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;

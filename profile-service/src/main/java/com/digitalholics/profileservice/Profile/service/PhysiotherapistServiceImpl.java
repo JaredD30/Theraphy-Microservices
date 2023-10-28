@@ -6,27 +6,27 @@ import com.digitalholics.profileservice.Profile.domain.model.entity.Physiotherap
 import com.digitalholics.profileservice.Profile.domain.model.entity.User.User;
 import com.digitalholics.profileservice.Profile.domain.persistence.PatientRepository;
 import com.digitalholics.profileservice.Profile.domain.persistence.PhysiotherapistRepository;
+import com.digitalholics.profileservice.Profile.domain.persistence.UserRepository;
 import com.digitalholics.profileservice.Profile.domain.service.PhysiotherapistService;
 import com.digitalholics.profileservice.Profile.resource.Physiotherapist.CreatePhysiotherapistResource;
 import com.digitalholics.profileservice.Profile.resource.Physiotherapist.UpdatePhysiotherapistResource;
 import com.digitalholics.profileservice.Shared.Exception.ResourceNotFoundException;
 import com.digitalholics.profileservice.Shared.Exception.ResourceValidationException;
-import com.netflix.discovery.converters.Auto;
-import jakarta.validation.ConstraintViolation;
 
-import jakarta.validation.Validator;
+
 import jakarta.ws.rs.NotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 public class PhysiotherapistServiceImpl implements PhysiotherapistService {
@@ -34,17 +34,18 @@ public class PhysiotherapistServiceImpl implements PhysiotherapistService {
 
     private final PhysiotherapistRepository physiotherapistRepository;
     private final PatientRepository patientRepository;
+    private final UserRepository userRepository;
 
-
+    private final RestTemplate restTemplate;
 
 
     //private final Validator validator;
 
-    public PhysiotherapistServiceImpl(PhysiotherapistRepository physiotherapistRepository, PatientRepository patientRepository) {
+    public PhysiotherapistServiceImpl(PhysiotherapistRepository physiotherapistRepository, PatientRepository patientRepository, UserRepository userRepository, RestTemplate restTemplate) {
         this.physiotherapistRepository = physiotherapistRepository;
         this.patientRepository = patientRepository;
-        //this.userRepository = userRepository;
-        //this.validator = validator;
+        this.userRepository = userRepository;
+        this.restTemplate = restTemplate;
     }
 
     @Override
@@ -58,30 +59,27 @@ public class PhysiotherapistServiceImpl implements PhysiotherapistService {
     }
 
     @Override
-    public Physiotherapist getById(Integer patientId) {
+    public Physiotherapist getById( Integer patientId) {
         return physiotherapistRepository.findById(patientId)
                 .orElseThrow(()-> new ResourceNotFoundException(ENTITY, patientId));    }
 
     @Override
-    public Physiotherapist getByUserId(Integer userId) {
+    public Physiotherapist getByUserId( Integer userId) {
         return physiotherapistRepository.findByUserId(userId)
                 .orElseThrow(()-> new ResourceNotFoundException(ENTITY, userId));    }
 
     @Override
-    public Physiotherapist create(CreatePhysiotherapistResource physiotherapistResource) {
-        //Set<ConstraintViolation<CreatePhysiotherapistResource>> violations = validator.validate(physiotherapistResource);
+    public Physiotherapist getLoggedInPhysiotherapist(String jwt) {
 
-        //if (!violations.isEmpty())
-            //throw new ResourceValidationException(ENTITY, violations);
+        User user = validateJwtAndGetUser(jwt);
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
+        return physiotherapistRepository.findPhysiotherapistByUserUsername(user.getUsername());
+    }
 
-        //Optional<User> userOptional = userRepository.findByUsername(username);
+    @Override
+    public Physiotherapist create(String jwt, CreatePhysiotherapistResource physiotherapistResource) {
 
-        //User user = userOptional.orElseThrow(() -> new NotFoundException("User not found for username: " + username));
-
-
+        User user = validateJwtAndGetUser(jwt);
 
         Physiotherapist physiotherapistWithDni = physiotherapistRepository.findPhysiotherapistByDni(physiotherapistResource.getDni());
         Patient patientWithDni = patientRepository.findPatientByDni(physiotherapistResource.getDni());
@@ -91,7 +89,7 @@ public class PhysiotherapistServiceImpl implements PhysiotherapistService {
                     "A physiotherapist with the same Dni first name already exists.");
 
         Physiotherapist physiotherapist = new Physiotherapist();
-        physiotherapist.setUserId(physiotherapistResource.getUserId());
+        physiotherapist.setUser(user);
         physiotherapist.setAge(physiotherapistResource.getAge());
         physiotherapist.setDni(physiotherapistResource.getDni());
         physiotherapist.setLocation(physiotherapistResource.getLocation());
@@ -107,8 +105,12 @@ public class PhysiotherapistServiceImpl implements PhysiotherapistService {
         return physiotherapistRepository.save(physiotherapist);    }
 
     @Override
-    public Physiotherapist update(Integer physiotherapistId, UpdatePhysiotherapistResource request) {
+    public Physiotherapist update(String jwt, Integer physiotherapistId, UpdatePhysiotherapistResource request) {
+        User user = validateJwtAndGetUser(jwt);
+
         Physiotherapist physiotherapist = getById(physiotherapistId);
+
+        if(Objects.equals(user.getUsername(), physiotherapist.getUser().getUsername()) || Objects.equals(String.valueOf(user.getRole()), "ADMIN")){
 
         physiotherapist.setDni(request.getDni() != null ? request.getDni() : physiotherapist.getDni());
         physiotherapist.setAge(request.getAge() != null ? request.getAge() : physiotherapist.getAge());
@@ -123,12 +125,48 @@ public class PhysiotherapistServiceImpl implements PhysiotherapistService {
         physiotherapist.setFees(request.getFees() != null ? request.getFees() : physiotherapist.getFees());
 
         return physiotherapistRepository.save(physiotherapist);
+        }
+        throw new ResourceValidationException("JWT",
+                "Invalid access.");
     }
 
     @Override
-    public ResponseEntity<?> delete(Integer physiotherapistId) {
+    public ResponseEntity<?> delete(String jwt, Integer physiotherapistId) {
+        User user = validateJwtAndGetUser(jwt);
+
         return physiotherapistRepository.findById(physiotherapistId).map(physiotherapist -> {
-            physiotherapistRepository.delete(physiotherapist);
-            return ResponseEntity.ok().build();
+            if(Objects.equals(user.getUsername(), physiotherapist.getUser().getUsername()) || Objects.equals(String.valueOf(user.getRole()), "ADMIN")){
+
+                physiotherapistRepository.delete(physiotherapist);
+                return ResponseEntity.ok().build();
+            }
+            throw new ResourceValidationException("JWT",
+                    "Invalid access.");
         }).orElseThrow(()-> new ResourceNotFoundException(ENTITY,physiotherapistId));    }
+
+    public User validateJwtAndGetUser(String jwt) {
+        if (jwt != null && jwt.startsWith("Bearer ")) {
+            jwt = jwt.substring(7); // Quita los primeros 7 caracteres ("Bearer ")
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", jwt);
+
+        HttpEntity<String> requestEntity = new HttpEntity<>(null, headers);
+
+        String validationEndpointUrl = "http://security-service/api/v1/security/auth/validate-jwt";
+        ResponseEntity<String> responseEntity = restTemplate.exchange(validationEndpointUrl, HttpMethod.GET, requestEntity, String.class);
+
+        Optional<User> userOptional = userRepository.findByUsername(responseEntity.getBody());
+
+        User user = userOptional.orElseThrow(() -> new NotFoundException("User not found for username: " + responseEntity.getBody()));
+
+        if(Objects.equals(String.valueOf(user.getRole()), "PHYSIOTHERAPIST")
+                || Objects.equals(String.valueOf(user.getRole()), "ADMIN")){
+            return user;
+        }
+
+        throw new ResourceValidationException("JWT",
+                "Invalid rol.");
+    }
 }

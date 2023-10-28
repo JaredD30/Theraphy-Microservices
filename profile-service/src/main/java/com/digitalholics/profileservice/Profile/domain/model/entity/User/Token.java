@@ -1,6 +1,5 @@
 package com.digitalholics.profileservice.Profile.domain.model.entity.User;
 
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

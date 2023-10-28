@@ -53,7 +53,9 @@ public class Physiotherapist {
     @Min(0)
     private Double fees;
 
-    @Column(name = "user_id")
-    private Integer userId;
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    @JsonIgnore
+    private User user;
 
 }

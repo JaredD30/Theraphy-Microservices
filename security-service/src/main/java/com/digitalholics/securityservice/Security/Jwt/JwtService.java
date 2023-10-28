@@ -86,4 +86,15 @@ public class JwtService {
     private boolean isTokenExpired(String token){
         return getExpiration(token).before(new Date());
     }
+
+    public String validateJwtAndGetUsername(String jwt) {
+        try {
+            Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(jwt).getBody();
+            String username = claims.getSubject(); // Obtiene el nombre de usuario del token JWT
+            return username;
+        } catch (Exception e) {
+            // La validación del token falló, puedes manejarlo según tus necesidades (por ejemplo, lanzar una excepción)
+            return null; // o null si la validación falla
+        }
+    }
 }

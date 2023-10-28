@@ -23,6 +23,4 @@ public class PhysiotherapistResource {
     private Integer yearsExperience;
     private Double fees;
     private UserResource user;
-    private Integer userId;
-
 }

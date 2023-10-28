@@ -41,7 +41,9 @@ public class Patient {
 
     private String location;
 
-    @Column(name = "user_id")
-    private Integer userId;
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    @JsonIgnore
+    private User user;
 
 }

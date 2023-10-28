@@ -1,6 +1,7 @@
 package com.digitalholics.consultationsservice.Consultation.domain.model.entity;
 
 
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -43,9 +44,13 @@ public class Consultation {
     @NotBlank
     private String place;
 
-    @Column(name = "physiotherapist_id")
-    private Integer physiotherapistId;
+    @ManyToOne
+    @JoinColumn(name = "physiotherapist_id")
+    @JsonIgnore
+    private Physiotherapist physiotherapist;
 
-    @Column(name = "patient_id")
-    private Integer patientIdd;
+    @ManyToOne
+    @JoinColumn(name = "patient_id")
+    @JsonIgnore
+    private Patient patient;
 }

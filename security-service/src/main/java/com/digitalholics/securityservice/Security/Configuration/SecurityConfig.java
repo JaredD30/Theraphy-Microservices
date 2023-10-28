@@ -36,11 +36,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authRequest ->
                         authRequest
                                 .requestMatchers("**").permitAll()
-                                .requestMatchers("/api/v1/**").hasAnyRole(ADMIN.name(),USER.name(),PATIENT.name(),PHYSIOTHERAPIST.name())
-                                .requestMatchers(GET,"/api/v1/**").hasAnyAuthority(ADMIN.name(),USER.name(),PATIENT.name(),PHYSIOTHERAPIST.name())
-                                .requestMatchers(POST,"/api/v1/**").hasAnyAuthority(ADMIN.name(),USER.name(),PATIENT.name(),PHYSIOTHERAPIST.name())
-                                .requestMatchers(PUT,"/api/v1/**").hasAnyAuthority(ADMIN.name(),USER.name(),PATIENT.name(),PHYSIOTHERAPIST.name())
-                                .requestMatchers(DELETE,"/api/v1/**").hasAnyAuthority(ADMIN.name(),USER.name(),PATIENT.name(),PHYSIOTHERAPIST.name())
+                                .requestMatchers("/api/v1/**").permitAll()
+                                .requestMatchers(GET,"/api/v1/**").permitAll()
+                                .requestMatchers(POST,"/api/v1/**").permitAll()
+                                .requestMatchers(PUT,"/api/v1/**").permitAll()
+                                .requestMatchers(DELETE,"/api/v1/**").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(sessionManager ->

@@ -1,5 +1,8 @@
 package com.digitalholics.consultationsservice.Consultation.resource;
 
+import com.digitalholics.consultationsservice.Consultation.resource.Patient.PatientResource;
+import com.digitalholics.consultationsservice.Consultation.resource.Physiotherapist.PhysiotherapistResource;
+
 import lombok.*;
 
 @Getter
@@ -16,6 +19,6 @@ public class ConsultationResource {
     private String date;
     private String hour;
     private String place;
-    private Integer physiotherapistId;
-    private Integer patientId;
+    private PhysiotherapistResource physiotherapist;
+    private PatientResource patient;
 }

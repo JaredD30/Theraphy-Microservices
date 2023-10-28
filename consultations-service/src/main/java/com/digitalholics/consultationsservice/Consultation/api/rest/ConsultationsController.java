@@ -24,53 +24,55 @@ public class ConsultationsController {
     }
 
     @GetMapping
-    public Page<ConsultationResource> getAllConsultations(Pageable pageable) {
+    public Page<ConsultationResource> getAllConsultations(@RequestHeader("Authorization") String jwt, Pageable pageable) {
         return mapper.modelListPage(consultationService.getAll(), pageable);
     }
 
     @GetMapping("{consultationId}")
-    public ConsultationResource getConsultationById(@PathVariable Integer consultationId) {
+    public ConsultationResource getConsultationById(@RequestHeader("Authorization") String jwt, @PathVariable Integer consultationId) {
         return mapper.toResource(consultationService.getById(consultationId));
     }
 
     @GetMapping("byPatientId/{patientId}")
-    public Page<ConsultationResource> getConsultationsByPatientId(@PathVariable Integer patientId, Pageable pageable) {
+    public Page<ConsultationResource> getConsultationsByPatientId(@RequestHeader("Authorization") String jwt, @PathVariable Integer patientId, Pageable pageable) {
         return mapper.modelListPage(consultationService.getByPatientId(patientId), pageable);
     }
 
     @GetMapping("byPhysiotherapistId/{physiotherapistId}")
-    public Page<ConsultationResource> getConsultationsByPhysiotherapistId(@PathVariable Integer physiotherapistId, Pageable pageable) {
+    public Page<ConsultationResource> getConsultationsByPhysiotherapistId(@RequestHeader("Authorization") String jwt, @PathVariable Integer physiotherapistId, Pageable pageable) {
         return mapper.modelListPage(consultationService.getByPhysiotherapistId(physiotherapistId), pageable);
     }
 
     @GetMapping("consultationByPhysiotherapistId/{physiotherapistId}")
-    public ConsultationResource getConsultationByPhysiotherapistId(@PathVariable Integer physiotherapistId) {
+    public ConsultationResource getConsultationByPhysiotherapistId(@RequestHeader("Authorization") String jwt, @PathVariable Integer physiotherapistId) {
         return mapper.toResource(consultationService.getConsultationByPhysiotherapistId(physiotherapistId));
     }
 
     @PostMapping
-    public ResponseEntity<ConsultationResource> createConsultation(@RequestBody CreateConsultationResource resource) {
-        return new ResponseEntity<>(mapper.toResource(consultationService.create(resource)), HttpStatus.CREATED);
+    public ResponseEntity<ConsultationResource> createConsultation(@RequestHeader("Authorization") String jwt, @RequestBody CreateConsultationResource resource) {
+        return new ResponseEntity<>(mapper.toResource(consultationService.create(jwt, resource)), HttpStatus.CREATED);
     }
 
     @PatchMapping("{consultationId}")
     public ResponseEntity<ConsultationResource> patchConsultation(
+            @RequestHeader("Authorization") String jwt,
             @PathVariable Integer consultationId,
             @RequestBody UpdateConsultationResource request) {
 
-        return new  ResponseEntity<>(mapper.toResource(consultationService.update(consultationId,request)), HttpStatus.CREATED);
+        return new  ResponseEntity<>(mapper.toResource(consultationService.update(jwt, consultationId,request)), HttpStatus.CREATED);
     }
 
     @DeleteMapping("{consultationId}")
-    public ResponseEntity<?> deleteConsultation(@PathVariable Integer consultationId) {
-        return consultationService.delete(consultationId);
+    public ResponseEntity<?> deleteConsultation(@RequestHeader("Authorization") String jwt, @PathVariable Integer consultationId) {
+        return consultationService.delete(jwt, consultationId);
     }
 
     @PatchMapping("updateDiagnosis/{consultationId}")
     public ResponseEntity<ConsultationResource> updateConsultationDiagnosis(
+            @RequestHeader("Authorization") String jwt,
             @PathVariable Integer consultationId,
             @RequestBody String diagnosis) {
 
-        return new  ResponseEntity<>(mapper.toResource(consultationService.updateDiagnosis(consultationId,diagnosis)), HttpStatus.CREATED);
+        return new  ResponseEntity<>(mapper.toResource(consultationService.updateDiagnosis(jwt, consultationId,diagnosis)), HttpStatus.CREATED);
     }
 }

@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/general-portal")
+@RequestMapping("/api/v1/security/general-portal")
 @RequiredArgsConstructor
 public class GeneralController {
 

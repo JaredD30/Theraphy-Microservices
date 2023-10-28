@@ -1,6 +1,5 @@
 package com.digitalholics.profileservice.Profile.resource.Patient;
 
-
 import com.digitalholics.profileservice.Profile.resource.User.UserResource;
 import lombok.*;
 
@@ -17,5 +16,5 @@ public class PatientResource {
     private String birthdayDate;
     private Integer appointmentQuantity;
     private String location;
-    private Integer userId;
+    private UserResource user;
 }

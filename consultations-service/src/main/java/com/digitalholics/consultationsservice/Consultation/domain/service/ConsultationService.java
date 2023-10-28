@@ -20,10 +20,10 @@ public interface ConsultationService {
 
     Consultation getConsultationByPhysiotherapistId(Integer physiotherapistId);
 
-    Consultation create(CreateConsultationResource consultation);
-    Consultation update(Integer consultationId, UpdateConsultationResource request);
-    ResponseEntity<?> delete(Integer ConsultationId);
+    Consultation create(String jwt, CreateConsultationResource consultation);
+    Consultation update(String jwt, Integer consultationId, UpdateConsultationResource request);
+    ResponseEntity<?> delete(String jwt, Integer ConsultationId);
 
-    Consultation updateDiagnosis(Integer consultationId, String diagnosis);
+    Consultation updateDiagnosis(String jwt, Integer consultationId, String diagnosis);
 
 }

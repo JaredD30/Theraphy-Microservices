@@ -25,12 +25,12 @@ public class ConsultationsController {
 
     @GetMapping
     public Page<ConsultationResource> getAllConsultations(@RequestHeader("Authorization") String jwt, Pageable pageable) {
-        return mapper.modelListPage(consultationService.getAll(), pageable);
+        return mapper.modelListPage(consultationService.getAll(jwt), pageable);
     }
 
     @GetMapping("{consultationId}")
     public ConsultationResource getConsultationById(@RequestHeader("Authorization") String jwt, @PathVariable Integer consultationId) {
-        return mapper.toResource(consultationService.getById(consultationId));
+        return mapper.toResource(consultationService.getById(jwt, consultationId));
     }
 
     @GetMapping("byPatientId/{patientId}")

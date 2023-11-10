@@ -12,6 +12,8 @@
         <option value="$PROJECT_DIR$/config-server/pom.xml" />
         <option value="$PROJECT_DIR$/zull-gateway/pom.xml" />
         <option value="$PROJECT_DIR$/echo-service/pom.xml" />
+        <option value="$PROJECT_DIR$/therapy-service/pom.xml" />
+        <option value="$PROJECT_DIR$/health-expertise-service/pom.xml" />
       </list>
     </option>
   </component>

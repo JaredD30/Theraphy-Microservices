@@ -36,7 +36,7 @@ public class PatientsController {
 
     @GetMapping
     public Page<PatientResource> getAllPatients(@RequestHeader("Authorization") String jwt, Pageable pageable) {
-        return mapper.modelListPage(patientService.getAll(), pageable);
+        return mapper.modelListPage(patientService.getAll(jwt), pageable);
     }
 
     @GetMapping("{patientId}")

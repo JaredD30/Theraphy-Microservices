@@ -12,9 +12,9 @@ import java.util.List;
 
 public interface ConsultationService {
 
-    List<Consultation> getAll();
+    List<Consultation> getAll(String jwt);
     Page<Consultation> getAll(Pageable pageable);
-    Consultation getById(Integer consultationId);
+    Consultation getById(String jwt, Integer consultationId);
     List<Consultation> getByPatientId(Integer patientId);
     List<Consultation> getByPhysiotherapistId(Integer physiotherapistId);
 

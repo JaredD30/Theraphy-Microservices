@@ -11,9 +11,11 @@
         <module name="security-service" />
         <module name="api-gateway" />
         <module name="profile-service" />
+        <module name="therapy-service" />
         <module name="eureka-server" />
         <module name="consultations-service" />
         <module name="echo-service" />
+        <module name="health-expertise-service" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -29,8 +31,10 @@
       <module name="consultations-service" options="-parameters" />
       <module name="echo-service" options="-parameters" />
       <module name="eureka-server" options="-parameters" />
+      <module name="health-expertise-service" options="-parameters" />
       <module name="profile-service" options="-parameters" />
       <module name="security-service" options="-parameters" />
+      <module name="therapy-service" options="-parameters" />
       <module name="zull-gateway" options="-parameters" />
       <module name="zuul-gateway" options="-parameters" />
     </option>

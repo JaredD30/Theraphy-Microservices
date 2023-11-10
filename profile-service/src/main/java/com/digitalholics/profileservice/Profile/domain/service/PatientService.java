@@ -12,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 public interface PatientService {
-    List<Patient> getAll();
+    List<Patient> getAll(String jwt);
     Page<Patient> getAll(Pageable pageable);
     Patient getById( Integer patientId);
     Patient getByDni(String dni);

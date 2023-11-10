@@ -2,10 +2,12 @@ package com.digitalholics.consultationsservice.Consultation.service;
 
 
 import com.digitalholics.consultationsservice.Consultation.domain.model.entity.Consultation;
+import com.digitalholics.consultationsservice.Consultation.domain.model.entity.External.Diagnosis;
 import com.digitalholics.consultationsservice.Consultation.domain.model.entity.External.Patient;
 import com.digitalholics.consultationsservice.Consultation.domain.model.entity.External.Physiotherapist;
 import com.digitalholics.consultationsservice.Consultation.domain.model.entity.External.User;
 import com.digitalholics.consultationsservice.Consultation.domain.persistence.ConsultationRepository;
+import com.digitalholics.consultationsservice.Consultation.domain.persistence.External.DiagnosisRepository;
 import com.digitalholics.consultationsservice.Consultation.domain.persistence.External.PatientRepository;
 import com.digitalholics.consultationsservice.Consultation.domain.persistence.External.PhysiotherapistRepository;
 import com.digitalholics.consultationsservice.Consultation.domain.persistence.External.UserRepository;
@@ -17,6 +19,9 @@ import com.digitalholics.consultationsservice.Shared.Exception.ResourceNotFoundE
 import com.digitalholics.consultationsservice.Shared.Exception.ResourceValidationException;
 
 
+import com.digitalholics.consultationsservice.Shared.JwtValidation.JwtValidator;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
 import jakarta.ws.rs.NotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,9 +34,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class ConsultationServiceImpl implements ConsultationService {
@@ -41,28 +48,28 @@ public class ConsultationServiceImpl implements ConsultationService {
     private final ConsultationRepository consultationRepository;
     private final PhysiotherapistRepository physiotherapistRepository;
     private final PatientRepository patientRepository;
-
-    private final UserRepository userRepository;
-
-    //private final DiagnosisRepository diagnosisRepository;
-
-    private final RestTemplate restTemplate;
+    private final DiagnosisRepository diagnosisRepository;
+    private final JwtValidator jwtValidator;
+    private final Validator validator;
 
 
-    public ConsultationServiceImpl(ConsultationRepository consultationRepository, PhysiotherapistRepository physiotherapistRepository, PatientRepository patientRepository, UserRepository userRepository, RestTemplate restTemplate) {
+    public ConsultationServiceImpl(ConsultationRepository consultationRepository, PhysiotherapistRepository physiotherapistRepository, PatientRepository patientRepository, DiagnosisRepository diagnosisRepository,  JwtValidator jwtValidator, Validator validator) {
         this.consultationRepository = consultationRepository;
         this.physiotherapistRepository = physiotherapistRepository;
 
-        //this.diagnosisRepository = diagnosisRepository;
+        this.diagnosisRepository = diagnosisRepository;
 
         this.patientRepository = patientRepository;
-        this.userRepository = userRepository;
-        this.restTemplate = restTemplate;
+        this.jwtValidator = jwtValidator;
+        this.validator = validator;
     }
 
 
     @Override
-    public List<Consultation> getAll() {
+    public List<Consultation> getAll(String jwt) {
+
+        User user = jwtValidator.validateJwtAndGetUser(jwt, "ADMIN");
+
         return consultationRepository.findAll();
     }
 
@@ -72,7 +79,53 @@ public class ConsultationServiceImpl implements ConsultationService {
     }
 
     @Override
-    public Consultation getById(Integer consultationId) {
+    public Consultation getById(String jwt, Integer consultationId) {
+
+        User user = jwtValidator.validateJwtAndGetUserNoRol(jwt);
+
+        if(Objects.equals(String.valueOf(user.getRole()), "PATIENT")){
+            Optional<Consultation> consultationOptional = consultationRepository.findById(consultationId);
+            Consultation consultation = consultationOptional.orElseThrow(() -> new NotFoundException("Not found consultation with ID: " + consultationId));
+
+            if(Objects.equals(String.valueOf(user.getUsername()), consultation.getPatient().getUser().getUsername())){
+
+                return consultation;
+            }
+
+            throw new ResourceValidationException("JWT",
+                    "Invalid access.");
+        }
+
+        if(Objects.equals(String.valueOf(user.getRole()), "PHYSIOTHERAPIST")){
+            Optional<Consultation> consultationOptional = consultationRepository.findById(consultationId);
+            Consultation consultationNeeded = consultationOptional.orElseThrow(() -> new NotFoundException("Not found consultation with ID: " + consultationId));
+
+            Optional<Physiotherapist> physiotherapistOptional = Optional.ofNullable(physiotherapistRepository.findPhysiotherapistByUserUsername(user.getUsername()));
+            Physiotherapist physiotherapist = physiotherapistOptional.orElseThrow(() -> new NotFoundException("Not found patient with email: " + user.getUsername()));
+
+            List<Consultation> myConsultations = consultationRepository.findByPhysiotherapistId(physiotherapist.getId());
+
+
+            boolean isMyPatient = false;
+
+            for (Consultation consultation : myConsultations) {
+                if (Objects.equals(consultation.getPatient().getUser().getUsername(), consultationNeeded.getPatient().getUser().getUsername())) {
+
+                    isMyPatient = true;
+                    break;
+                }
+            }
+
+            if (isMyPatient) {
+
+                return consultationNeeded;
+            }
+
+            throw new ResourceValidationException("JWT",
+                    "Invalid access.");
+
+        }
+
         return consultationRepository.findById(consultationId)
                 .orElseThrow(()-> new ResourceNotFoundException(ENTITY, consultationId));
     }
@@ -111,8 +164,12 @@ public class ConsultationServiceImpl implements ConsultationService {
     @Override
     public Consultation create(String jwt, CreateConsultationResource consultationResource) {
 
+        Set<ConstraintViolation<CreateConsultationResource>> violations = validator.validate(consultationResource);
 
-        User user = validateJwtAndGetUser(jwt, "PATIENT");
+        if (!violations.isEmpty())
+            throw new ResourceValidationException(ENTITY, violations);
+
+        User user = jwtValidator.validateJwtAndGetUser(jwt, "PATIENT");
 
         Optional<Patient> patientOptional = Optional.ofNullable(patientRepository.findPatientsByUserUsername(user.getUsername()));
         Patient patient = patientOptional.orElseThrow(() -> new NotFoundException("Not found patient with email: " + user.getUsername()));
@@ -158,11 +215,8 @@ public class ConsultationServiceImpl implements ConsultationService {
     @Override
     public Consultation update(String jwt, Integer consultationId, UpdateConsultationResource request) {
 
-        User user = validateJwtAndGetUser(jwt, "PHYSIOTHERAPIST");
+        Consultation consultation = getById(jwt, consultationId);
 
-        Consultation consultation = getById(consultationId);
-
-        if(Objects.equals(user.getUsername(), consultation.getPhysiotherapist().getUser().getUsername()) || Objects.equals(String.valueOf(user.getRole()), "ADMIN")){
             if (request.getDone() != null) {
                 consultation.setDone(request.getDone());
             }
@@ -184,18 +238,12 @@ public class ConsultationServiceImpl implements ConsultationService {
 
             return consultationRepository.save(consultation);
 
-
-        }
-
-        throw new ResourceValidationException("JWT",
-                "Invalid rol.");
-
     }
 
 
     @Override
     public ResponseEntity<?> delete(String jwt, Integer consultationId) {
-        User user = validateJwtAndGetUser(jwt, "PATIENT");
+        User user = jwtValidator.validateJwtAndGetUser(jwt, "PATIENT");
 
         return consultationRepository.findById(consultationId).map(consultation -> {
             if(Objects.equals(user.getUsername(), consultation.getPatient().getUser().getUsername()) || Objects.equals(String.valueOf(user.getRole()), "ADMIN")){
@@ -211,11 +259,8 @@ public class ConsultationServiceImpl implements ConsultationService {
     @Override
     public Consultation updateDiagnosis(String jwt, Integer consultationId, String diagnosis) {
 
-        User user = validateJwtAndGetUser(jwt, "PHYSIOTHERAPIST");
 
-        Consultation consultation = getById(consultationId);
-
-        if(Objects.equals(user.getUsername(), consultation.getPhysiotherapist().getUser().getUsername()) || Objects.equals(String.valueOf(user.getRole()), "ADMIN")){
+        Consultation consultation = getById(jwt, consultationId);
 
             if (diagnosis != null) {
                 consultation.setDiagnosis(diagnosis);
@@ -224,46 +269,15 @@ public class ConsultationServiceImpl implements ConsultationService {
                 consultation.setDone(true);
             }
 
-        /*Diagnosis diagnosisResource = new Diagnosis();
+        Diagnosis diagnosisResource = new Diagnosis();
         diagnosisResource.setDiagnosis(diagnosis);
         diagnosisResource.setPatient(consultation.getPatient());
         diagnosisResource.setPhysiotherapist(consultation.getPhysiotherapist());
         diagnosisResource.setDate(String.valueOf(LocalDate.now()));
 
         diagnosisRepository.save(diagnosisResource);
-        */
+
 
             return consultationRepository.save(consultation);
-
-        }
-
-        throw new ResourceValidationException("JWT",
-                "Invalid access.");
-    }
-
-    public User validateJwtAndGetUser(String jwt, String admittedRole) {
-        if (jwt != null && jwt.startsWith("Bearer ")) {
-            jwt = jwt.substring(7); // Quita los primeros 7 caracteres ("Bearer ")
-        }
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", jwt);
-
-        HttpEntity<String> requestEntity = new HttpEntity<>(null, headers);
-
-        String validationEndpointUrl = "http://security-service/api/v1/security/auth/validate-jwt";
-        ResponseEntity<String> responseEntity = restTemplate.exchange(validationEndpointUrl, HttpMethod.GET, requestEntity, String.class);
-
-        Optional<User> userOptional = userRepository.findByUsername(responseEntity.getBody());
-
-        User user = userOptional.orElseThrow(() -> new NotFoundException("User not found for username: " + responseEntity.getBody()));
-
-        if(Objects.equals(String.valueOf(user.getRole()), admittedRole)
-                || Objects.equals(String.valueOf(user.getRole()), "ADMIN")){
-            return user;
-        }
-
-        throw new ResourceValidationException("JWT",
-                "Invalid rol.");
     }
 }

@@ -10,6 +10,9 @@ import com.digitalholics.profileservice.Profile.resource.Patient.CreatePatientRe
 import com.digitalholics.profileservice.Profile.resource.Patient.UpdatePatientResource;
 import com.digitalholics.profileservice.Shared.Exception.ResourceNotFoundException;
 import com.digitalholics.profileservice.Shared.Exception.ResourceValidationException;
+import com.digitalholics.profileservice.Shared.JwtValidation.JwtValidator;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
 import jakarta.ws.rs.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -25,31 +28,29 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class PatientServiceImpl implements PatientService {
 
 ;    private static final String ENTITY = "Patient";
-
     private final PatientRepository patientRepository;
-
-    private final UserRepository userRepository;
-
-    private final RestTemplate restTemplate;
+    private final JwtValidator jwtValidator;
+    private final Validator validator;
 
 
-    //private final Validator validator;
 
     @Autowired
-    public PatientServiceImpl(PatientRepository patientRepository, UserRepository userRepository, RestTemplate restTemplate) {
+    public PatientServiceImpl(PatientRepository patientRepository, JwtValidator jwtValidator, Validator validator) {
         this.patientRepository = patientRepository;
-        this.userRepository = userRepository;
-        //this.validator = validator;
-        this.restTemplate = restTemplate;
+        this.jwtValidator = jwtValidator;
+        this.validator = validator;
     }
 
     @Override
-    public List<Patient> getAll() {
+    public List<Patient> getAll(String jwt) {
+        User user = jwtValidator.validateJwtAndGetUser(jwt, "ADMIN");
+
         return patientRepository.findAll();
     }
 
@@ -78,7 +79,7 @@ public class PatientServiceImpl implements PatientService {
     @Override
     public Patient getLoggedInPatient(String jwt) {
 
-        User user = validateJwtAndGetUser(jwt);
+        User user = jwtValidator.validateJwtAndGetUser(jwt,"PATIENT");
 
         return patientRepository.findPatientsByUserUsername(user.getUsername());
     }
@@ -86,7 +87,12 @@ public class PatientServiceImpl implements PatientService {
     @Override
     public Patient create(String jwt, CreatePatientResource patientResource) {
 
-        User user = validateJwtAndGetUser(jwt);
+        Set<ConstraintViolation<CreatePatientResource>> violations = validator.validate(patientResource);
+
+        if (!violations.isEmpty())
+            throw new ResourceValidationException(ENTITY, violations);
+
+        User user = jwtValidator.validateJwtAndGetUser(jwt, "PATIENT");
 
         Patient patientWithDni = patientRepository.findPatientByDni(patientResource.getDni());
 
@@ -109,7 +115,7 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     public Patient update(String jwt, Integer patientId, UpdatePatientResource request) {
-        User user = validateJwtAndGetUser(jwt);
+        User user = jwtValidator.validateJwtAndGetUser(jwt, "PATIENT");
 
         Patient patient = getById(patientId);
 
@@ -132,7 +138,7 @@ public class PatientServiceImpl implements PatientService {
     @Override
     public ResponseEntity<?> delete(String jwt, Integer patientId) {
 
-        User user = validateJwtAndGetUser(jwt);
+        User user = jwtValidator.validateJwtAndGetUser(jwt, "PATIENT");
 
         return patientRepository.findById(patientId).map(patient -> {
             if(Objects.equals(user.getUsername(), patient.getUser().getUsername()) || Objects.equals(String.valueOf(user.getRole()), "ADMIN")){
@@ -147,29 +153,7 @@ public class PatientServiceImpl implements PatientService {
     }
 
     public User validateJwtAndGetUser(String jwt) {
-        if (jwt != null && jwt.startsWith("Bearer ")) {
-            jwt = jwt.substring(7); // Quita los primeros 7 caracteres ("Bearer ")
-        }
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", jwt);
-
-        HttpEntity<String> requestEntity = new HttpEntity<>(null, headers);
-
-        String validationEndpointUrl = "http://security-service/api/v1/security/auth/validate-jwt";
-        ResponseEntity<String> responseEntity = restTemplate.exchange(validationEndpointUrl, HttpMethod.GET, requestEntity, String.class);
-
-        Optional<User> userOptional = userRepository.findByUsername(responseEntity.getBody());
-
-        User user = userOptional.orElseThrow(() -> new NotFoundException("User not found for username: " + responseEntity.getBody()));
-
-        if(Objects.equals(String.valueOf(user.getRole()), "PATIENT")
-                || Objects.equals(String.valueOf(user.getRole()), "ADMIN")){
-            return user;
-        }
-
-        throw new ResourceValidationException("JWT",
-                "Invalid rol.");
+        return jwtValidator.validateJwtAndGetUser(jwt, "PATIENT");
     }
 
 }

@@ -47,6 +47,18 @@ public class PhysiotherapistController {
         return mapper.toResource(physiotherapistService.getByUserId(userId));
     }
 
+    @GetMapping("/validate-jwt")
+    public ResponseEntity<String> validateJwtAndReturnUsername(@RequestHeader("Authorization") String jwt) {
+
+        String username = physiotherapistService.validateJwtAndGetUser(jwt).getUsername();
+
+        if (username != null) {
+            return new ResponseEntity<>(username, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("Invalid token", HttpStatus.UNAUTHORIZED);
+        }
+    }
+
     @PostMapping("registration-physiotherapist")
     public ResponseEntity<PhysiotherapistResource> createPhysiotherapist(@RequestHeader("Authorization") String jwt, @RequestBody CreatePhysiotherapistResource resource) {
         return new ResponseEntity<>(mapper.toResource(physiotherapistService.create(jwt, resource)), HttpStatus.CREATED);

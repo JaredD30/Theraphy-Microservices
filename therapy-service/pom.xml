@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.digitalholics</groupId>
-    <artifactId>consultations-service</artifactId>
+    <artifactId>therapy-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>consultations-service</name>
-    <description>consultations-service</description>
+    <name>therapy-service</name>
+    <description>therapy-service</description>
     <properties>
         <java.version>21</java.version>
         <spring-cloud.version>2022.0.4</spring-cloud.version>
@@ -56,7 +56,6 @@
             <artifactId>hibernate-validator</artifactId>
             <version>8.0.0.Final</version> <!-- Asegúrate de usar la versión más reciente -->
         </dependency>
-
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-core</artifactId>
@@ -75,8 +74,6 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-bootstrap</artifactId>
         </dependency>
-
-
     </dependencies>
     <dependencyManagement>
         <dependencies>

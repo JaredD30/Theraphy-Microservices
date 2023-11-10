@@ -15,7 +15,7 @@ import java.util.UUID;
 
 
 @RestController
-@RequestMapping("/echo")
+@RequestMapping("/api/v1/echo")
 public class EchoServiceController {
 
     @Value("${server.port}")

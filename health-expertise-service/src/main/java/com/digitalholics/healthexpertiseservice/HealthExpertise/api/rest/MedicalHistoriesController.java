@@ -30,7 +30,9 @@ public class MedicalHistoriesController {
     }
 
     @GetMapping("{medicalHistoryId}")
-    public MedicalHistoryResource getMedicalHistoryById(@RequestHeader("Authorization") String jwt, @PathVariable Integer medicalHistoryId) {
+    public MedicalHistoryResource getMedicalHistoryById(
+            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
+            @Parameter(description = "Medical History Id", required = true, examples = @ExampleObject(name = "medicalHistoryId", value = "1")) @PathVariable Integer medicalHistoryId) {
         return mapper.toResource(medicalHistoryService.getById(jwt, medicalHistoryId));
     }
 
@@ -40,21 +42,25 @@ public class MedicalHistoriesController {
     }
 
     @PostMapping
-    public ResponseEntity<MedicalHistoryResource> createMedicalHistory(@RequestHeader("Authorization") String jwt, @RequestBody CreateMedicalHistoryResource resource) {
+    public ResponseEntity<MedicalHistoryResource> createMedicalHistory(
+            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
+            @RequestBody CreateMedicalHistoryResource resource) {
         return new ResponseEntity<>(mapper.toResource(medicalHistoryService.create(jwt, resource)), HttpStatus.CREATED);
     }
 
     @PatchMapping("{medicalHistoryId}")
     public ResponseEntity<MedicalHistoryResource> patchMedicalHistory(
-            @RequestHeader("Authorization") String jwt,
-            @PathVariable Integer medicalHistoryId,
-            @RequestBody UpdateMedicalHistoryResource request) {
-
+            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
+            @Parameter(description = "Medical History Id", required = true, examples = @ExampleObject(name = "medicalHistoryId", value = "1")) @PathVariable Integer medicalHistoryId,
+            @RequestBody UpdateMedicalHistoryResource request
+    ) {
         return new  ResponseEntity<>(mapper.toResource(medicalHistoryService.update(jwt, medicalHistoryId,request)), HttpStatus.CREATED);
     }
 
     @DeleteMapping("{medicalHistoryId}")
-    public ResponseEntity<?> deleteMedicalHistory(@RequestHeader("Authorization") String jwt, @PathVariable Integer medicalHistoryId) {
+    public ResponseEntity<?> deleteMedicalHistory(
+            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
+            @Parameter(description = "Medical History Id", required = true, examples = @ExampleObject(name = "medicalHistoryId", value = "1")) @PathVariable Integer medicalHistoryId) {
         return medicalHistoryService.delete(jwt, medicalHistoryId);
     }
 }

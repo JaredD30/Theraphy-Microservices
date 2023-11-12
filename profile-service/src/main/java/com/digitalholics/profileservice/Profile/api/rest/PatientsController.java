@@ -39,6 +39,13 @@ public class PatientsController {
         return mapper.modelListPage(patientService.getAll(jwt), pageable);
     }
 
+    @Operation(summary = "Get patient by id", description = "Returns patient with a provided id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully got"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = { @Content(schema = @Schema()) })
+    })
     @GetMapping("{patientId}")
     public PatientResource getPatientById(@RequestHeader("Authorization") String jwt, @PathVariable Integer patientId) {
         return mapper.toResource(patientService.getById( patientId));
@@ -62,6 +69,13 @@ public class PatientsController {
         }
     }
 
+    @Operation(summary = "Registration patient", description = "Register a patient")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully registered"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = { @Content(schema = @Schema()) })
+    })
     @PostMapping("registration-patient")
     public ResponseEntity<PatientResource> createPatient(@RequestHeader("Authorization") String jwt, @RequestBody CreatePatientResource resource) {
         return new ResponseEntity<>(mapper.toResource(patientService.create(jwt,resource)), HttpStatus.CREATED);
@@ -69,15 +83,17 @@ public class PatientsController {
 
     @PatchMapping("{patientId}")
     public ResponseEntity<PatientResource> patchPatient(
-            @RequestHeader("Authorization") String jwt,
-            @PathVariable Integer patientId,
+            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
+            @Parameter(description = "Patient Id", required = true, examples = @ExampleObject(name = "patientId", value = "1")) @PathVariable Integer patientId,
             @RequestBody UpdatePatientResource request) {
 
         return new  ResponseEntity<>(mapper.toResource(patientService.update(jwt, patientId,request)), HttpStatus.CREATED);
     }
 
     @DeleteMapping("{patientId}")
-    public ResponseEntity<?> deleteUser(@RequestHeader("Authorization") String jwt, @PathVariable Integer patientId) {
+    public ResponseEntity<?> deleteUser(
+            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
+            @Parameter(description = "Patient Id", required = true, examples = @ExampleObject(name = "patientId", value = "1")) @PathVariable Integer patientId) {
         return patientService.delete(jwt, patientId);
     }
 }

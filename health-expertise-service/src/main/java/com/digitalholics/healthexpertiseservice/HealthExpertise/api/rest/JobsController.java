@@ -32,7 +32,9 @@ public class JobsController {
     }
 
     @GetMapping("{jobId}")
-    public JobResource getJobById(@RequestHeader("Authorization") String jwt, @PathVariable Integer jobId) {
+    public JobResource getJobById(
+            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
+            @Parameter(description = "Job id", required = true, examples = @ExampleObject(name = "jobId", value = "1")) @PathVariable Integer jobId) {
         return mapper.toResource(jobService.getById(jobId));
     }
 

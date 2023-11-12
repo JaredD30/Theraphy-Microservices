@@ -25,7 +25,8 @@ public class AppointmentsController {
     }
 
     @GetMapping
-    public Page<AppointmentResource> getAllAppointments(@RequestHeader("Authorization") String jwt, Pageable pageable) {
+    public Page<AppointmentResource> getAllAppointments(
+            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt, Pageable pageable) {
         return mapper.modelListPage(appointmentService.getAll(), pageable);
     }
 

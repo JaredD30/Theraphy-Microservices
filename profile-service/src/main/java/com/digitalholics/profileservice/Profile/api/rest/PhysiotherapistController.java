@@ -60,21 +60,24 @@ public class PhysiotherapistController {
     }
 
     @PostMapping("registration-physiotherapist")
-    public ResponseEntity<PhysiotherapistResource> createPhysiotherapist(@RequestHeader("Authorization") String jwt, @RequestBody CreatePhysiotherapistResource resource) {
+    public ResponseEntity<PhysiotherapistResource> createPhysiotherapist(
+            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt, @RequestBody CreatePhysiotherapistResource resource) {
         return new ResponseEntity<>(mapper.toResource(physiotherapistService.create(jwt, resource)), HttpStatus.CREATED);
     }
 
     @PatchMapping("{physiotherapistId}")
     public ResponseEntity<PhysiotherapistResource> patchPhysiotherapist(
-            @RequestHeader("Authorization") String jwt,
-            @PathVariable Integer physiotherapistId,
+            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
+            @Parameter(description = "Physiotherapist Id", required = true, examples = @ExampleObject(name = "physiotherapistId", value = "1")) @PathVariable Integer physiotherapistId,
             @RequestBody UpdatePhysiotherapistResource request) {
 
         return new  ResponseEntity<>(mapper.toResource(physiotherapistService.update(jwt, physiotherapistId,request)), HttpStatus.CREATED);
     }
 
     @DeleteMapping("{physiotherapistId}")
-    public ResponseEntity<?> deletePhysiotherapist(@RequestHeader("Authorization") String jwt, @PathVariable Integer physiotherapistId) {
+    public ResponseEntity<?> deletePhysiotherapist(
+            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
+            @Parameter(description = "Physiotherapist Id", required = true, examples = @ExampleObject(name = "physiotherapistId", value = "1")) @PathVariable Integer physiotherapistId) {
         return physiotherapistService.delete(jwt, physiotherapistId);
     }
 }

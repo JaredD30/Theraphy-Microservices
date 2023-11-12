@@ -32,7 +32,17 @@ public class ProfileServiceApplication {
 								.url("https://digitalholics-fundamentosdesoftware.github.io/Theraphy-LandingPage/"))
 						.contact(new Contact()
 								.url("https://digitalholics-fundamentosdesoftware.github.io/Theraphy-LandingPage/")
-								.name("Theraphy,.studio")));
+								.name("Theraphy,.studio")))
+				.components(new Components()
+				.addSecuritySchemes("bearer-jwt", new SecurityScheme()
+						.type(SecurityScheme.Type.HTTP)
+						.scheme("bearer")
+						.bearerFormat("JWT")
+						.in(SecurityScheme.In.HEADER)
+						.name("Authorization")
+				)
+		).addSecurityItem(new SecurityRequirement().addList("bearer-jwt"));
+
 
 	}
 }

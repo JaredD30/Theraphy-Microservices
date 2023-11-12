@@ -40,7 +40,9 @@ public class CertificationsController {
     }
 
     @PostMapping
-    public ResponseEntity<CertificationResource> createCertification(@RequestHeader("Authorization") String jwt, @RequestBody CreateCertificationResource resource) {
+    public ResponseEntity<CertificationResource> createCertification(
+            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
+            @RequestBody CreateCertificationResource resource) {
         return new ResponseEntity<>(mapper.toResource(certificationService.create(jwt, resource)), HttpStatus.CREATED);
     }
 
@@ -52,7 +54,9 @@ public class CertificationsController {
     }
 
     @DeleteMapping("{certificationId}")
-    public ResponseEntity<?> deleteCertification(@RequestHeader("Authorization") String jwt, @PathVariable Integer certificationId) {
+    public ResponseEntity<?> deleteCertification(
+            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
+            @Parameter(description = "Certification Id", required = true, examples = @ExampleObject(name = "certificationId", value = "1")) @PathVariable Integer certificationId) {
         return certificationService.delete(jwt, certificationId);
     }
 

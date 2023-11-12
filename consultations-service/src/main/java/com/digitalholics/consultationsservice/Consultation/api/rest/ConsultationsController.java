@@ -55,8 +55,8 @@ public class ConsultationsController {
 
     @PatchMapping("{consultationId}")
     public ResponseEntity<ConsultationResource> patchConsultation(
-            @RequestHeader("Authorization") String jwt,
-            @PathVariable Integer consultationId,
+            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
+            @Parameter(description = "Consultation Id", required = true, examples = @ExampleObject(name = "consultationId", value = "1")) @PathVariable Integer consultationId,
             @RequestBody UpdateConsultationResource request) {
 
         return new  ResponseEntity<>(mapper.toResource(consultationService.update(jwt, consultationId,request)), HttpStatus.CREATED);

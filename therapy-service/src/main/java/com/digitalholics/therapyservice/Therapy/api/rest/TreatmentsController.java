@@ -90,22 +90,45 @@ public class TreatmentsController {
         return mapper.toResource(treatmentService.getTreatmentByDateAndTherapyId(therapyId, date));
     }
 
+    @Operation(summary = "Create treatment", description = "Register a treatment")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully created"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = { @Content(schema = @Schema()) })
+    })
     @PostMapping
-    public ResponseEntity<TreatmentResource> createTreatment(@RequestHeader("Authorization") String jwt, @RequestBody CreateTreatmentResource resource) {
+    public ResponseEntity<TreatmentResource> createTreatment(
+            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt, @RequestBody CreateTreatmentResource resource) {
         return new ResponseEntity<>(mapper.toResource(treatmentService.create(jwt, resource)), HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Update a treatment partially", description = "Updates a treatment partially based on the provided data")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully updated"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = { @Content(schema = @Schema()) })
+    })
     @PatchMapping("{treatmentId}")
     public ResponseEntity<TreatmentResource> patchTreatment(
-            @RequestHeader("Authorization") String jwt,
-            @PathVariable Integer treatmentId,
+            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
+            @Parameter(description = "Treatment Id", required = true, examples = @ExampleObject(name = "treatmentId", value = "1"))@PathVariable Integer treatmentId,
             @RequestBody UpdateTreatmentResource request) {
 
         return new  ResponseEntity<>(mapper.toResource(treatmentService.update(treatmentId,request)), HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Delete a treatment", description = "Delete a treatment with a provided id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully deleted"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = { @Content(schema = @Schema()) })
+    })
     @DeleteMapping("{treatmentId}")
-    public ResponseEntity<?> deleteTreatment(@RequestHeader("Authorization") String jwt, @PathVariable Integer treatmentId) {
+    public ResponseEntity<?> deleteTreatment(
+            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt, @Parameter(description = "Treatment Id", required = true, examples = @ExampleObject(name = "treatmentId", value = "1")) @PathVariable Integer treatmentId) {
         return treatmentService.delete(treatmentId);
     }
 

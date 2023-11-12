@@ -8,6 +8,14 @@ import com.digitalholics.profileservice.Profile.resource.Patient.PatientResource
 import com.digitalholics.profileservice.Profile.resource.Physiotherapist.CreatePhysiotherapistResource;
 import com.digitalholics.profileservice.Profile.resource.Physiotherapist.PhysiotherapistResource;
 import com.digitalholics.profileservice.Profile.resource.Physiotherapist.UpdatePhysiotherapistResource;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -16,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = "/api/v1/profile/physiotherapists", produces = "application/json")
+@Tag(name = "Physiotherapists", description = "Physiotherapists operations: profile, listing, retrieval, validation, registration, update, and deletion")
 public class PhysiotherapistController {
     private final PhysiotherapistService physiotherapistService;
 
@@ -26,29 +35,72 @@ public class PhysiotherapistController {
         this.mapper = mapper;
     }
 
+    @Operation(summary = "Get physiotherapist logged in", description = "Returns physiotherapist logged in")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully got"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = { @Content(schema = @Schema()) })
+    })
     @GetMapping("/profile")
-    public PhysiotherapistResource getLoggedInPhysiotherapistProfile(@RequestHeader("Authorization") String jwt) {
+    public PhysiotherapistResource getLoggedInPhysiotherapistProfile(
+            @Parameter(hidden = true)
+            @RequestHeader("Authorization") String jwt
+    ) {
         return mapper.toResource(physiotherapistService.getLoggedInPhysiotherapist(jwt));
     }
 
+    @Operation(summary = "Get all physiotherapist", description = "Returns physiotherapist's list")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully got"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = { @Content(schema = @Schema()) })
+    })
     @GetMapping
-    public Page<PhysiotherapistResource> getAllPPhysiotherapist(@RequestHeader("Authorization") String jwt, Pageable pageable) {
+    public Page<PhysiotherapistResource> getAllPPhysiotherapist( @Parameter(hidden = true) @RequestHeader("Authorization") String jwt, Pageable pageable) {
         return mapper.modelListPage(physiotherapistService.getAll(), pageable);
     }
 
+    @Operation(summary = "Get physiotherapist by id", description = "Returns physiotherapist with a provide id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully got"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = { @Content(schema = @Schema()) })
+    })
     @GetMapping("{physiotherapistId}")
     //@PreAuthorize("hasAuthority('patient:read')")
-    public PhysiotherapistResource getPhysiotherapistById(@RequestHeader("Authorization") String jwt, @PathVariable Integer physiotherapistId) {
+    public PhysiotherapistResource getPhysiotherapistById(
+            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
+            @Parameter(description = "Physiotherapist Id", required = true, examples = @ExampleObject(name = "physiotherapistId", value = "1")) @PathVariable Integer physiotherapistId) {
         return mapper.toResource(physiotherapistService.getById(physiotherapistId));
     }
 
+    @Operation(summary = "Get physiotherapist by user id", description = "Returns physiotherapist with a provide user id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully got"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = { @Content(schema = @Schema()) })
+    })
     @GetMapping("byUserId/{userId}")
-    public PhysiotherapistResource getPhysiotherapistByUserId(@RequestHeader("Authorization") String jwt, @PathVariable Integer userId) {
+    public PhysiotherapistResource getPhysiotherapistByUserId(
+            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
+            @Parameter(description = "User Id", required = true, examples = @ExampleObject(name = "userId", value = "1")) @PathVariable Integer userId
+    ) {
         return mapper.toResource(physiotherapistService.getByUserId(userId));
     }
 
+    @Operation(summary = "Validate JSON Web Token", description = "Returns username from jwt")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully found"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = { @Content(schema = @Schema()) })
+    })
     @GetMapping("/validate-jwt")
-    public ResponseEntity<String> validateJwtAndReturnUsername(@RequestHeader("Authorization") String jwt) {
+    public ResponseEntity<String> validateJwtAndReturnUsername(@Parameter(hidden = true) @RequestHeader("Authorization") String jwt) {
 
         String username = physiotherapistService.validateJwtAndGetUser(jwt).getUsername();
 
@@ -59,12 +111,26 @@ public class PhysiotherapistController {
         }
     }
 
+    @Operation(summary = "Registration physiotherapist", description = "Register a physiotherapist")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully registered"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = { @Content(schema = @Schema()) })
+    })
     @PostMapping("registration-physiotherapist")
     public ResponseEntity<PhysiotherapistResource> createPhysiotherapist(
             @Parameter(hidden = true) @RequestHeader("Authorization") String jwt, @RequestBody CreatePhysiotherapistResource resource) {
         return new ResponseEntity<>(mapper.toResource(physiotherapistService.create(jwt, resource)), HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Update a physiotherapist partially", description = "Updates a physiotherapist partially based on the provided data")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully updated"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = { @Content(schema = @Schema()) })
+    })
     @PatchMapping("{physiotherapistId}")
     public ResponseEntity<PhysiotherapistResource> patchPhysiotherapist(
             @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
@@ -74,6 +140,13 @@ public class PhysiotherapistController {
         return new  ResponseEntity<>(mapper.toResource(physiotherapistService.update(jwt, physiotherapistId,request)), HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Delete a physiotherapist", description = "Delete a physiotherapist with a provided id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully deleted"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = { @Content(schema = @Schema()) })
+    })
     @DeleteMapping("{physiotherapistId}")
     public ResponseEntity<?> deletePhysiotherapist(
             @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,

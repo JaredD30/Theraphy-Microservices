@@ -10,6 +10,7 @@
         <module name="config-server" />
         <module name="security-service" />
         <module name="api-gateway" />
+        <module name="social-service" />
         <module name="profile-service" />
         <module name="therapy-service" />
         <module name="eureka-server" />
@@ -26,15 +27,16 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="api-gateway" options="-parameters" />
-      <module name="config-server" options="-parameters" />
-      <module name="consultations-service" options="-parameters" />
-      <module name="echo-service" options="-parameters" />
-      <module name="eureka-server" options="-parameters" />
-      <module name="health-expertise-service" options="-parameters" />
-      <module name="profile-service" options="-parameters" />
-      <module name="security-service" options="-parameters" />
-      <module name="therapy-service" options="-parameters" />
+      <module name="api-gateway" options="" />
+      <module name="config-server" options="" />
+      <module name="consultations-service" options="" />
+      <module name="echo-service" options="" />
+      <module name="eureka-server" options="" />
+      <module name="health-expertise-service" options="" />
+      <module name="profile-service" options="" />
+      <module name="security-service" options="" />
+      <module name="social-service" options="-parameters" />
+      <module name="therapy-service" options="" />
       <module name="zull-gateway" options="-parameters" />
       <module name="zuul-gateway" options="-parameters" />
     </option>

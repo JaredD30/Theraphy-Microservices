@@ -8,8 +8,10 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="config-server" />
+        <module name="payment-service" />
         <module name="security-service" />
         <module name="api-gateway" />
+        <module name="social-service" />
         <module name="profile-service" />
         <module name="therapy-service" />
         <module name="eureka-server" />
@@ -32,8 +34,10 @@
       <module name="echo-service" options="-parameters" />
       <module name="eureka-server" options="-parameters" />
       <module name="health-expertise-service" options="-parameters" />
+      <module name="payment-service" options="-parameters" />
       <module name="profile-service" options="-parameters" />
       <module name="security-service" options="-parameters" />
+      <module name="social-service" options="-parameters" />
       <module name="therapy-service" options="-parameters" />
       <module name="zull-gateway" options="-parameters" />
       <module name="zuul-gateway" options="-parameters" />

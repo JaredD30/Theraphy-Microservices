@@ -41,23 +41,45 @@ public class ReviewsController {
         return mapper.modelListPage(reviewService.getByPhysiotherapistId(physiotherapistId), pageable);
     }
 
-
+    @Operation(summary = "Create review", description = "Register a review")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully created"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = { @Content(schema = @Schema()) })
+    })
     @PostMapping
-    public ResponseEntity<ReviewResource> createReview(@RequestHeader("Authorization") String jwt, @RequestBody CreateReviewResource resource) {
+    public ResponseEntity<ReviewResource> createReview(
+            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt, @RequestBody CreateReviewResource resource) {
         return new ResponseEntity<>(mapper.toResource(reviewService.create(jwt,resource)), HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Update a review partially", description = "Updates a review partially based on the provided data")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully updated"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = { @Content(schema = @Schema()) })
+    })
     @PatchMapping("{reviewId}")
     public ResponseEntity<ReviewResource> patchReview(
-            @RequestHeader("Authorization") String jwt,
-            @PathVariable Integer reviewId,
+            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
+            @Parameter(description = "Review Id", required = true, examples = @ExampleObject(name = "reviewId", value = "1")) @PathVariable Integer reviewId,
             @RequestBody UpdateReviewResource request) {
 
         return new  ResponseEntity<>(mapper.toResource(reviewService.update(reviewId,request)), HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Delete a review", description = "Delete a review with a provided id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully deleted"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = { @Content(schema = @Schema()) })
+    })
     @DeleteMapping("{reviewId}")
-    public ResponseEntity<?> deleteReview(@RequestHeader("Authorization") String jwt, @PathVariable Integer reviewId) {
+    public ResponseEntity<?> deleteReview(@Parameter(hidden = true) @RequestHeader("Authorization") String jwt, @Parameter(description = "Review Id", required = true, examples = @ExampleObject(name = "reviewId", value = "1")) @PathVariable Integer reviewId) {
         return reviewService.delete(reviewId);
     }
 }

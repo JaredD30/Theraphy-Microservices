@@ -5,6 +5,8 @@ import com.digitalholics.securityservice.Security.Domain.Service.Communication.A
 import com.digitalholics.securityservice.Security.Domain.Service.Communication.LoginRequest;
 import com.digitalholics.securityservice.Security.Domain.Service.Communication.RegisterRequest;
 import com.digitalholics.securityservice.Security.Jwt.JwtService;
+import com.digitalholics.securityservice.Security.Resource.UserResource;
+import com.digitalholics.securityservice.Security.mapping.UserMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -31,6 +33,8 @@ public class AuthController {
     private final AuthService authService;
 
     private final JwtService jwtService;
+
+    private final UserMapper mapper;
 
     @Operation(summary = "Login user", description = "Returns access_token and refresh_token")
     @ApiResponses(value = {
@@ -106,6 +110,14 @@ public class AuthController {
         return username != null ? username : jwt;
     }
 
+    @GetMapping("/get-user")
+    public UserResource validateJwtAndReturnUser(@Parameter(hidden = true) @RequestHeader("Authorization") String jwt) {
 
+        if (jwt != null && jwt.startsWith("Bearer ")) {
+            jwt = jwt.substring(7); // Quita los primeros 7 caracteres ("Bearer ")
+        }
+        User username = jwtService.validateJwtAndGetUser(jwt);
+        return username != null ? mapper.toResource(username) : null;
+    }
 
 }

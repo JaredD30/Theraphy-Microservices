@@ -1,10 +1,14 @@
 package com.digitalholics.securityservice.Security.Jwt;
 
+import com.digitalholics.securityservice.Security.Domain.Model.Entity.User;
+import com.digitalholics.securityservice.Shared.JwtValidation.JwtValidator;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.validation.Validator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -27,6 +31,18 @@ public class JwtService {
 
     @Value("${spring.application.security.jwt.refresh-token.expiration}")
     private long refreshExpiration;
+
+    private JwtValidator jwtValidator;
+
+    @Autowired
+    public JwtService(JwtValidator jwtValidator) {
+        this.jwtValidator = jwtValidator;
+
+    }
+
+    public User validateJwtAndGetUser(String jwt) {
+        return jwtValidator.validateJwtAndGetUser(jwt, "ADMIN");
+    }
 
     public String getToken(UserDetails user) {
         return getToken(new HashMap<>(), user);
@@ -97,4 +113,5 @@ public class JwtService {
             return null; // o null si la validación falla
         }
     }
+
 }

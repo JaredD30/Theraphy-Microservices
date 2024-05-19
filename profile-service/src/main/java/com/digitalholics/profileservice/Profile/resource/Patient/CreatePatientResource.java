@@ -8,13 +8,11 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreatePatientResource {
-
-    private Integer id;
     private String dni;
     private Integer age;
     private String photoUrl;
     private String birthdayDate;
     private Integer appointmentQuantity;
     private String location;
-
+    private Integer userId;
 }

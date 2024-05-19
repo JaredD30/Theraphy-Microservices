@@ -12,16 +12,12 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 public interface PatientService {
-    List<Patient> getAll(String jwt);
     Page<Patient> getAll(Pageable pageable);
     Patient getById( Integer patientId);
     Patient getByDni(String dni);
     Patient getByUserId( Integer userId);
 
-    Patient getLoggedInPatient(String jwt);
-
-    Patient create( String jwt, CreatePatientResource patient);
-    Patient update(String jwt, Integer patientId, UpdatePatientResource request);
-    ResponseEntity<?> delete(String jwt, Integer patientId);
-    User validateJwtAndGetUser(String jwt);
+    Patient create(CreatePatientResource patient);
+    Patient update(Integer patientId, UpdatePatientResource request);
+    ResponseEntity<?> delete(Integer patientId);
 }

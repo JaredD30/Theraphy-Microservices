@@ -1,7 +1,6 @@
 package com.digitalholics.profileservice.Profile.resource.Physiotherapist;
 
 
-import com.digitalholics.profileservice.Profile.resource.External.UserResource;
 import lombok.*;
 
 @Getter
@@ -22,5 +21,4 @@ public class PhysiotherapistResource {
     private Integer patientQuantity;
     private Integer yearsExperience;
     private Double fees;
-    private UserResource user;
 }

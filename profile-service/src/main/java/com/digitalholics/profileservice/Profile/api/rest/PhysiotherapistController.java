@@ -35,21 +35,6 @@ public class PhysiotherapistController {
         this.mapper = mapper;
     }
 
-    @Operation(summary = "Get physiotherapist logged in", description = "Returns physiotherapist logged in")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully got"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = { @Content(schema = @Schema()) }),
-            @ApiResponse(responseCode = "403", description = "Forbidden", content = { @Content(schema = @Schema()) }),
-            @ApiResponse(responseCode = "404", description = "Not Found", content = { @Content(schema = @Schema()) })
-    })
-    @GetMapping("/profile")
-    public PhysiotherapistResource getLoggedInPhysiotherapistProfile(
-            @Parameter(hidden = true)
-            @RequestHeader("Authorization") String jwt
-    ) {
-        return mapper.toResource(physiotherapistService.getLoggedInPhysiotherapist(jwt));
-    }
-
     @Operation(summary = "Get all physiotherapist", description = "Returns physiotherapist's list")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully got"),
@@ -92,25 +77,6 @@ public class PhysiotherapistController {
         return mapper.toResource(physiotherapistService.getByUserId(userId));
     }
 
-    @Operation(summary = "Validate JSON Web Token", description = "Returns username from jwt")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully found"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = { @Content(schema = @Schema()) }),
-            @ApiResponse(responseCode = "403", description = "Forbidden", content = { @Content(schema = @Schema()) }),
-            @ApiResponse(responseCode = "404", description = "Not Found", content = { @Content(schema = @Schema()) })
-    })
-    @GetMapping("/validate-jwt")
-    public ResponseEntity<String> validateJwtAndReturnUsername(@Parameter(hidden = true) @RequestHeader("Authorization") String jwt) {
-
-        String username = physiotherapistService.validateJwtAndGetUser(jwt).getUsername();
-
-        if (username != null) {
-            return new ResponseEntity<>(username, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>("Invalid token", HttpStatus.UNAUTHORIZED);
-        }
-    }
-
     @Operation(summary = "Registration physiotherapist", description = "Register a physiotherapist")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully registered"),
@@ -121,7 +87,7 @@ public class PhysiotherapistController {
     @PostMapping("registration-physiotherapist")
     public ResponseEntity<PhysiotherapistResource> createPhysiotherapist(
             @Parameter(hidden = true) @RequestHeader("Authorization") String jwt, @RequestBody CreatePhysiotherapistResource resource) {
-        return new ResponseEntity<>(mapper.toResource(physiotherapistService.create(jwt, resource)), HttpStatus.CREATED);
+        return new ResponseEntity<>(mapper.toResource(physiotherapistService.create(resource)), HttpStatus.CREATED);
     }
 
     @Operation(summary = "Update a physiotherapist partially", description = "Updates a physiotherapist partially based on the provided data")
@@ -137,7 +103,7 @@ public class PhysiotherapistController {
             @Parameter(description = "Physiotherapist Id", required = true, examples = @ExampleObject(name = "physiotherapistId", value = "1")) @PathVariable Integer physiotherapistId,
             @RequestBody UpdatePhysiotherapistResource request) {
 
-        return new  ResponseEntity<>(mapper.toResource(physiotherapistService.update(jwt, physiotherapistId,request)), HttpStatus.CREATED);
+        return new  ResponseEntity<>(mapper.toResource(physiotherapistService.update(physiotherapistId,request)), HttpStatus.CREATED);
     }
 
     @Operation(summary = "Delete a physiotherapist", description = "Delete a physiotherapist with a provided id")
@@ -151,6 +117,6 @@ public class PhysiotherapistController {
     public ResponseEntity<?> deletePhysiotherapist(
             @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
             @Parameter(description = "Physiotherapist Id", required = true, examples = @ExampleObject(name = "physiotherapistId", value = "1")) @PathVariable Integer physiotherapistId) {
-        return physiotherapistService.delete(jwt, physiotherapistId);
+        return physiotherapistService.delete(physiotherapistId);
     }
 }

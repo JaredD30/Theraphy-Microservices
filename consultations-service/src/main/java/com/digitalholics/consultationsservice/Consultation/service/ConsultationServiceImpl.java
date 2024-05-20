@@ -7,6 +7,7 @@ import com.digitalholics.consultationsservice.Consultation.domain.service.Consul
 
 import com.digitalholics.consultationsservice.Consultation.resource.CreateConsultationResource;
 import com.digitalholics.consultationsservice.Consultation.resource.UpdateConsultationResource;
+import com.digitalholics.consultationsservice.Shared.EmailService.MailSenderService;
 import com.digitalholics.consultationsservice.Shared.Exception.ResourceNotFoundException;
 import com.digitalholics.consultationsservice.Shared.Exception.ResourceValidationException;
 import jakarta.validation.ConstraintViolation;
@@ -29,11 +30,13 @@ public class ConsultationServiceImpl implements ConsultationService {
 
     private final ConsultationRepository consultationRepository;
     private final Validator validator;
+    private final MailSenderService mailService;
 
 
-    public ConsultationServiceImpl(ConsultationRepository consultationRepository, Validator validator) {
+    public ConsultationServiceImpl(ConsultationRepository consultationRepository, Validator validator, MailSenderService mailSenderService) {
         this.consultationRepository = consultationRepository;
         this.validator = validator;
+        this.mailService = mailSenderService;
     }
 
     @Override
@@ -102,6 +105,10 @@ public class ConsultationServiceImpl implements ConsultationService {
         //Aumento de la cantidad de consultas de un paciente
 
         //Aumento de cantidad de pacientes de un fisio
+
+        //Send email to the user
+
+        mailService.sendNewMail("","","");
 
         return consultationRepository.save(consultation);
     }

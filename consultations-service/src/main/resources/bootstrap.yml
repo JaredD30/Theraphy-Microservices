@@ -6,3 +6,14 @@ spring:
     config:
       uri: http://localhost:8888 #where the config-service is running
       fail-fast: true #the service will not run if it can't reach the config-service
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username:
+    password:
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true

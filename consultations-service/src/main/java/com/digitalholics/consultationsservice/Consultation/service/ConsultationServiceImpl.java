@@ -2,6 +2,8 @@ package com.digitalholics.consultationsservice.Consultation.service;
 
 
 import com.digitalholics.consultationsservice.Consultation.domain.model.entity.Consultation;
+import com.digitalholics.consultationsservice.Consultation.domain.model.entity.External.Patient;
+import com.digitalholics.consultationsservice.Consultation.domain.model.entity.External.User;
 import com.digitalholics.consultationsservice.Consultation.domain.persistence.ConsultationRepository;
 import com.digitalholics.consultationsservice.Consultation.domain.service.ConsultationService;
 
@@ -10,6 +12,7 @@ import com.digitalholics.consultationsservice.Consultation.resource.UpdateConsul
 import com.digitalholics.consultationsservice.Shared.EmailService.MailSenderService;
 import com.digitalholics.consultationsservice.Shared.Exception.ResourceNotFoundException;
 import com.digitalholics.consultationsservice.Shared.Exception.ResourceValidationException;
+import jakarta.mail.MessagingException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import org.springframework.data.domain.Page;
@@ -83,7 +86,7 @@ public class ConsultationServiceImpl implements ConsultationService {
     }
 
     @Override
-    public Consultation create(CreateConsultationResource consultationResource) {
+    public Consultation create(CreateConsultationResource consultationResource, String jwt) {
 
         Set<ConstraintViolation<CreateConsultationResource>> violations = validator.validate(consultationResource);
 
@@ -108,7 +111,14 @@ public class ConsultationServiceImpl implements ConsultationService {
 
         //Send email to the user
 
-        mailService.sendNewMail("","","");
+        User user = mailService.getUser(jwt);
+
+        String body = mailService.buildHtmlEmail(user.getFirstname(),consultationResource.getTopic(),consultationResource.getDate(),"1");
+        try {
+            mailService.sendNewMail(user.getUsername(),"Confirmacion de Consulta",body);
+        }catch (MessagingException e){
+            e.printStackTrace();
+        }
 
         return consultationRepository.save(consultation);
     }

@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -100,9 +101,14 @@ public class ConsultationsController {
     })
     @PostMapping
     public ResponseEntity<ConsultationResource> createConsultation(
-            @RequestBody CreateConsultationResource resource
+            @RequestBody CreateConsultationResource resource,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader
     ) {
-        return new ResponseEntity<>(mapper.toResource(consultationService.create(resource)), HttpStatus.CREATED);
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            authorizationHeader = authorizationHeader.substring(7); // Quita "Bearer " del token
+        }
+
+        return new ResponseEntity<>(mapper.toResource(consultationService.create(resource, authorizationHeader)), HttpStatus.CREATED);
     }
 
     @Operation(summary = "Update a consultation partially", description = "Updates a consultation partially based on the provided data")

@@ -9,6 +9,7 @@ import com.digitalholics.profileservice.Profile.resource.Patient.CreatePatientRe
 import com.digitalholics.profileservice.Profile.resource.Patient.UpdatePatientResource;
 import com.digitalholics.profileservice.Shared.Exception.ResourceNotFoundException;
 import com.digitalholics.profileservice.Shared.Exception.ResourceValidationException;
+import com.digitalholics.profileservice.Shared.ExternalConfiguration;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import jakarta.ws.rs.NotFoundException;
@@ -31,16 +32,16 @@ import java.util.Set;
 @Service
 public class PatientServiceImpl implements PatientService {
 
-;    private static final String ENTITY = "Patient";
+    private static final String ENTITY = "Patient";
     private final PatientRepository patientRepository;
     private final Validator validator;
-
-
+    private final ExternalConfiguration externalConfiguration;
 
     @Autowired
-    public PatientServiceImpl(PatientRepository patientRepository,Validator validator) {
+    public PatientServiceImpl(PatientRepository patientRepository, Validator validator, ExternalConfiguration externalConfiguration) {
         this.patientRepository = patientRepository;
         this.validator = validator;
+        this.externalConfiguration = externalConfiguration;
     }
 
     @Override
@@ -66,7 +67,7 @@ public class PatientServiceImpl implements PatientService {
     }
 
     @Override
-    public Patient create(CreatePatientResource patientResource) {
+    public Patient create(CreatePatientResource patientResource, String jwt) {
 
         Set<ConstraintViolation<CreatePatientResource>> violations = validator.validate(patientResource);
 
@@ -74,6 +75,8 @@ public class PatientServiceImpl implements PatientService {
             throw new ResourceValidationException(ENTITY, violations);
 
         Patient patientWithDni = patientRepository.findPatientByDni(patientResource.getDni());
+
+        User user = externalConfiguration.getUser(jwt);
 
         if(patientWithDni != null)
             throw new ResourceValidationException(ENTITY,
@@ -86,7 +89,7 @@ public class PatientServiceImpl implements PatientService {
         patient.setBirthdayDate(patientResource.getBirthdayDate());
         patient.setPhotoUrl(patientResource.getPhotoUrl());
         patient.setAppointmentQuantity(0);
-        patient.setUserId(patientResource.getUserId());
+        patient.setUserId(user.getId());
 
         return patientRepository.save(patient);
 

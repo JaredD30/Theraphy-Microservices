@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -73,9 +74,13 @@ public class PatientsController {
     })
     @PostMapping("registration-patient")
     public ResponseEntity<PatientResource> createPatient(
-            @RequestBody CreatePatientResource resource
+            @RequestBody CreatePatientResource resource,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader
     ) {
-        return new ResponseEntity<>(mapper.toResource(patientService.create(resource)), HttpStatus.CREATED);
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            authorizationHeader = authorizationHeader.substring(7); // Quita "Bearer " del token
+        }
+        return new ResponseEntity<>(mapper.toResource(patientService.create(resource, authorizationHeader)), HttpStatus.CREATED);
     }
 
     @Operation(summary = "Update a patient partially", description = "Updates a patient with a provided patient id")

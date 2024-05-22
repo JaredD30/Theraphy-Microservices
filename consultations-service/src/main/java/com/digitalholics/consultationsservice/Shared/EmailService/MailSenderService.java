@@ -9,19 +9,24 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.client.RestTemplate;
 
-@Service
+@Component
 public class MailSenderService {
-    @Autowired
-    private JavaMailSender mailSender;
 
-    @Autowired
-    private RestTemplate restTemplate;
+    private final JavaMailSender mailSender;
+
+    private final RestTemplate restTemplate;
+
+    public MailSenderService(JavaMailSender mailSender, RestTemplate restTemplate) {
+        this.mailSender = mailSender;
+        this.restTemplate = restTemplate;
+    }
 
     public void sendNewMail(String to, String subject, String body) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
@@ -75,7 +80,7 @@ public class MailSenderService {
     }
 
     public User getUser(String jwt) {
-        String userServiceUrl = "http://localhost:8080/api/v1/security/auth/get-user";
+        String userServiceUrl = "http://security-service/api/v1/security/auth/get-user";
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + jwt);
         HttpEntity<String> entity = new HttpEntity<>(headers);

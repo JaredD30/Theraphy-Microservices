@@ -17,7 +17,7 @@ public interface PatientService {
     Patient getByDni(String dni);
     Patient getByUserId( Integer userId);
 
-    Patient create(CreatePatientResource patient);
+    Patient create(CreatePatientResource patient,String jwt);
     Patient update(Integer patientId, UpdatePatientResource request);
     ResponseEntity<?> delete(Integer patientId);
 }

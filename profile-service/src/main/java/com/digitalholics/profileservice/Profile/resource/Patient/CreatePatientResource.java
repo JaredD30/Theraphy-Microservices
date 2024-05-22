@@ -14,5 +14,4 @@ public class CreatePatientResource {
     private String birthdayDate;
     private Integer appointmentQuantity;
     private String location;
-    private Integer userId;
 }

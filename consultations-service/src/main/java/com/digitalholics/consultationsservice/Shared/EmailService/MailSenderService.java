@@ -21,11 +21,8 @@ public class MailSenderService {
 
     private final JavaMailSender mailSender;
 
-    private final RestTemplate restTemplate;
-
-    public MailSenderService(JavaMailSender mailSender, RestTemplate restTemplate) {
+    public MailSenderService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
-        this.restTemplate = restTemplate;
     }
 
     public void sendNewMail(String to, String subject, String body) throws MessagingException {
@@ -77,15 +74,5 @@ public class MailSenderService {
                 "</div>" +
                 "</body>" +
                 "</html>";
-    }
-
-    public User getUser(String jwt) {
-        String userServiceUrl = "http://security-service/api/v1/security/auth/get-user";
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + jwt);
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-
-        ResponseEntity<User> response = restTemplate.exchange(userServiceUrl, HttpMethod.GET, entity, User.class);
-        return response.getBody();
     }
 }

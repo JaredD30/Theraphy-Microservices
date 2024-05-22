@@ -1,6 +1,7 @@
 package com.digitalholics.profileservice.Profile.domain.model.entity.External;
 
 
+import jakarta.persistence.Embeddable;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 

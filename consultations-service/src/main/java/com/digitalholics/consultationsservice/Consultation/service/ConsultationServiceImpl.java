@@ -12,6 +12,7 @@ import com.digitalholics.consultationsservice.Consultation.resource.UpdateConsul
 import com.digitalholics.consultationsservice.Shared.EmailService.MailSenderService;
 import com.digitalholics.consultationsservice.Shared.Exception.ResourceNotFoundException;
 import com.digitalholics.consultationsservice.Shared.Exception.ResourceValidationException;
+import com.digitalholics.consultationsservice.Shared.configuration.ExternalConfiguration;
 import jakarta.mail.MessagingException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
@@ -34,12 +35,14 @@ public class ConsultationServiceImpl implements ConsultationService {
     private final ConsultationRepository consultationRepository;
     private final Validator validator;
     private final MailSenderService mailService;
+    private final ExternalConfiguration externalConfiguration;
 
 
-    public ConsultationServiceImpl(ConsultationRepository consultationRepository, Validator validator, MailSenderService mailSenderService) {
+    public ConsultationServiceImpl(ConsultationRepository consultationRepository, Validator validator, MailSenderService mailSenderService, ExternalConfiguration externalConfiguration) {
         this.consultationRepository = consultationRepository;
         this.validator = validator;
         this.mailService = mailSenderService;
+        this.externalConfiguration = externalConfiguration;
     }
 
     @Override
@@ -111,7 +114,7 @@ public class ConsultationServiceImpl implements ConsultationService {
 
         //Send email to the user
 
-        User user = mailService.getUser(jwt);
+        User user = externalConfiguration.getUser(jwt);
 
         String body = mailService.buildHtmlEmail(user.getFirstname(),consultationResource.getTopic(),consultationResource.getDate(),"1");
         try {

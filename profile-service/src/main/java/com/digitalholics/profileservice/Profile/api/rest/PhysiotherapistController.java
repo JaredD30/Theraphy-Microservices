@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -86,8 +87,13 @@ public class PhysiotherapistController {
     })
     @PostMapping("registration-physiotherapist")
     public ResponseEntity<PhysiotherapistResource> createPhysiotherapist(
-            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt, @RequestBody CreatePhysiotherapistResource resource) {
-        return new ResponseEntity<>(mapper.toResource(physiotherapistService.create(resource)), HttpStatus.CREATED);
+            @RequestBody CreatePhysiotherapistResource resource,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader
+    ) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            authorizationHeader = authorizationHeader.substring(7); // Quita "Bearer " del token
+        }
+        return new ResponseEntity<>(mapper.toResource(physiotherapistService.create(resource,authorizationHeader)), HttpStatus.CREATED);
     }
 
     @Operation(summary = "Update a physiotherapist partially", description = "Updates a physiotherapist partially based on the provided data")

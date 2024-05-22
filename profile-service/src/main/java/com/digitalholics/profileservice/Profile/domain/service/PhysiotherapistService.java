@@ -17,7 +17,7 @@ public interface PhysiotherapistService {
     Page<Physiotherapist> getAll(Pageable pageable);
     Physiotherapist getById(Integer patientId);
     Physiotherapist getByUserId(Integer userId);
-    Physiotherapist create(CreatePhysiotherapistResource physiotherapist);
+    Physiotherapist create(CreatePhysiotherapistResource physiotherapist, String jwt);
     Physiotherapist update(Integer physiotherapistId, UpdatePhysiotherapistResource request);
     ResponseEntity<?> delete(Integer physiotherapistId);
 

@@ -11,7 +11,7 @@ import com.digitalholics.profileservice.Profile.resource.Physiotherapist.CreateP
 import com.digitalholics.profileservice.Profile.resource.Physiotherapist.UpdatePhysiotherapistResource;
 import com.digitalholics.profileservice.Shared.Exception.ResourceNotFoundException;
 import com.digitalholics.profileservice.Shared.Exception.ResourceValidationException;
-import com.digitalholics.profileservice.Shared.ExternalConfiguration;
+import com.digitalholics.profileservice.Shared.configuration.ExternalConfiguration;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import org.springframework.data.domain.Page;
@@ -57,7 +57,7 @@ public class PhysiotherapistServiceImpl implements PhysiotherapistService {
                 .orElseThrow(()-> new ResourceNotFoundException(ENTITY, patientId));    }
 
     @Override
-    public Physiotherapist getByUserId( Integer userId) {
+    public Physiotherapist getByUserId(Integer userId) {
         return physiotherapistRepository.findByUserId(userId)
                 .orElseThrow(()-> new ResourceNotFoundException(ENTITY, userId));    }
 
@@ -80,7 +80,6 @@ public class PhysiotherapistServiceImpl implements PhysiotherapistService {
         User user = externalConfiguration.getUser(jwt);
 
         System.out.printf(String.valueOf(user));
-
 
         if (Objects.equals(String.valueOf(user.getRole()), "ADMIN") || Objects.equals(String.valueOf(user.getRole()), "PHYSIOTHERAPIST")) {
             Physiotherapist physiotherapist = new Physiotherapist();

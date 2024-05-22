@@ -29,6 +29,7 @@ import java.util.List;
 @RequestMapping(value = "/api/v1/profile/patients", produces = "application/json")
 @Tag(name = "Patients", description = "Patients operations: profile, listing, retrieval, validation, registration, update, and deletion")
 public class PatientsController {
+
     private final PatientService patientService;
 
     private final PatientMapper mapper;

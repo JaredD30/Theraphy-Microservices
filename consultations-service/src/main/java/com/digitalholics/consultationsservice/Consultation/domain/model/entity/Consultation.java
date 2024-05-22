@@ -46,13 +46,7 @@ public class Consultation {
     @NotBlank
     private String place;
 
-    @ManyToOne
-    @JoinColumn(name = "physiotherapist_id")
-    @JsonIgnore
-    private Physiotherapist physiotherapist;
+    private Integer physiotherapistId;
 
-    @ManyToOne
-    @JoinColumn(name = "patient_id")
-    @JsonIgnore
-    private Patient patient;
+    private Integer patientId;
 }

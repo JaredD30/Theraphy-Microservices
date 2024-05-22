@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,20 +32,6 @@ public class ConsultationsController {
         this.consultationService = consultationService;
         this.mapper = mapper;
     }
-
-    @Operation(summary = "Get all consultations", description = "Returns consultations' list")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully got"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = { @Content(schema = @Schema()) }),
-            @ApiResponse(responseCode = "403", description = "Forbidden", content = { @Content(schema = @Schema()) }),
-            @ApiResponse(responseCode = "404", description = "Not Found", content = { @Content(schema = @Schema()) })
-
-    })
-    @GetMapping
-    public Page<ConsultationResource> getAllConsultations( @Parameter(hidden = true) @RequestHeader("Authorization") String jwt, Pageable pageable) {
-        return mapper.modelListPage(consultationService.getAll(jwt), pageable);
-    }
-
     @Operation(summary = "Get consultation by id", description = "Returns consultation with a provided id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully got"),
@@ -55,10 +42,9 @@ public class ConsultationsController {
     })
     @GetMapping("{consultationId}")
     public ConsultationResource getConsultationById(
-            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
             @Parameter(description = "Consultation id", required = true, examples = @ExampleObject(name = "consultationId", value = "1")) @PathVariable Integer consultationId
     ) {
-        return mapper.toResource(consultationService.getById(jwt, consultationId));
+        return mapper.toResource(consultationService.getById(consultationId));
     }
 
     @Operation(summary = "Get consultation by patient id", description = "Returns consultation with a provide patient id")
@@ -71,7 +57,7 @@ public class ConsultationsController {
     })
     @GetMapping("byPatientId/{patientId}")
     public Page<ConsultationResource> getConsultationsByPatientId(
-            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt, @Parameter(description = "Patient Id", required = true, examples = @ExampleObject(name = "patientId", value = "1")) @PathVariable Integer patientId, Pageable pageable) {
+            @Parameter(description = "Patient Id", required = true, examples = @ExampleObject(name = "patientId", value = "1")) @PathVariable Integer patientId, Pageable pageable) {
         return mapper.modelListPage(consultationService.getByPatientId(patientId), pageable);
     }
 
@@ -85,7 +71,6 @@ public class ConsultationsController {
     })
     @GetMapping("byPhysiotherapistId/{physiotherapistId}")
     public Page<ConsultationResource> getConsultationsByPhysiotherapistId(
-            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
             @Parameter(description = "Physiotherapist Id", required = true, examples = @ExampleObject(name = "physiotherapistId", value = "1")) @PathVariable Integer physiotherapistId, Pageable pageable
     ) {
         return mapper.modelListPage(consultationService.getByPhysiotherapistId(physiotherapistId), pageable);
@@ -101,7 +86,6 @@ public class ConsultationsController {
     })
     @GetMapping("consultationByPhysiotherapistId/{physiotherapistId}")
     public ConsultationResource getConsultationByPhysiotherapistId(
-            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
             @Parameter(description = "Physiotherapist Id", required = true, examples = @ExampleObject(name = "physiotherapistId", value = "1")) @PathVariable Integer physiotherapistId
     ) {
         return mapper.toResource(consultationService.getConsultationByPhysiotherapistId(physiotherapistId));
@@ -117,10 +101,14 @@ public class ConsultationsController {
     })
     @PostMapping
     public ResponseEntity<ConsultationResource> createConsultation(
-            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
-            @RequestBody CreateConsultationResource resource
+            @RequestBody CreateConsultationResource resource,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader
     ) {
-        return new ResponseEntity<>(mapper.toResource(consultationService.create(jwt, resource)), HttpStatus.CREATED);
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            authorizationHeader = authorizationHeader.substring(7); // Quita "Bearer " del token
+        }
+
+        return new ResponseEntity<>(mapper.toResource(consultationService.create(resource, authorizationHeader)), HttpStatus.CREATED);
     }
 
     @Operation(summary = "Update a consultation partially", description = "Updates a consultation partially based on the provided data")
@@ -133,11 +121,10 @@ public class ConsultationsController {
     })
     @PatchMapping("{consultationId}")
     public ResponseEntity<ConsultationResource> patchConsultation(
-            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
             @Parameter(description = "Consultation Id", required = true, examples = @ExampleObject(name = "consultationId", value = "1")) @PathVariable Integer consultationId,
             @RequestBody UpdateConsultationResource request) {
 
-        return new  ResponseEntity<>(mapper.toResource(consultationService.update(jwt, consultationId,request)), HttpStatus.CREATED);
+        return new  ResponseEntity<>(mapper.toResource(consultationService.update(consultationId,request)), HttpStatus.CREATED);
     }
 
     @Operation(summary = "Delete a consultation", description = "Delete a consultation with a provided id")
@@ -149,10 +136,9 @@ public class ConsultationsController {
     })
     @DeleteMapping("{consultationId}")
     public ResponseEntity<?> deleteConsultation(
-            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
             @Parameter(description = "Consultation Id", required = true, examples = @ExampleObject(name = "consultationId", value = "1"))  @PathVariable Integer consultationId
     ) {
-        return consultationService.delete(jwt, consultationId);
+        return consultationService.delete(consultationId);
     }
 
     @Operation(summary = "Update a consultation's diagnosis", description = "Updates a consultation's diagnosis")
@@ -165,11 +151,10 @@ public class ConsultationsController {
     })
     @PatchMapping("updateDiagnosis/{consultationId}")
     public ResponseEntity<ConsultationResource> updateConsultationDiagnosis(
-            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
             @Parameter(description = "Consultation Id", required = true, examples = @ExampleObject(name = "consultationId", value = "1")) @PathVariable Integer consultationId,
             @RequestBody String diagnosis
     ) {
 
-        return new  ResponseEntity<>(mapper.toResource(consultationService.updateDiagnosis(jwt, consultationId,diagnosis)), HttpStatus.CREATED);
+        return new  ResponseEntity<>(mapper.toResource(consultationService.updateDiagnosis(consultationId,diagnosis)), HttpStatus.CREATED);
     }
 }

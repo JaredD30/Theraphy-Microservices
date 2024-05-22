@@ -8,6 +8,8 @@ import java.util.List;
 
 @Repository
 public interface ConsultationRepository extends JpaRepository<Consultation, Integer> {
+
+    Consultation findConsultationById(Integer consultationId);
     Consultation findByTopic(String topic);
 
     Consultation findConsultationByPhysiotherapistId(Integer physiotherapistId);

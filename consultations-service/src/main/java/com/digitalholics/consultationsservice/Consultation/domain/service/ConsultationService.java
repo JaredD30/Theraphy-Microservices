@@ -14,16 +14,16 @@ public interface ConsultationService {
 
     List<Consultation> getAll(String jwt);
     Page<Consultation> getAll(Pageable pageable);
-    Consultation getById(String jwt, Integer consultationId);
+    Consultation getById(Integer consultationId);
     List<Consultation> getByPatientId(Integer patientId);
     List<Consultation> getByPhysiotherapistId(Integer physiotherapistId);
 
     Consultation getConsultationByPhysiotherapistId(Integer physiotherapistId);
 
-    Consultation create(String jwt, CreateConsultationResource consultation);
-    Consultation update(String jwt, Integer consultationId, UpdateConsultationResource request);
-    ResponseEntity<?> delete(String jwt, Integer ConsultationId);
+    Consultation create(CreateConsultationResource consultation, String jwt);
+    Consultation update(Integer consultationId, UpdateConsultationResource request);
+    ResponseEntity<?> delete(Integer ConsultationId);
 
-    Consultation updateDiagnosis(String jwt, Integer consultationId, String diagnosis);
+    Consultation updateDiagnosis(Integer consultationId, String diagnosis);
 
 }

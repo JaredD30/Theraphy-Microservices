@@ -11,6 +11,7 @@ import com.digitalholics.profileservice.Profile.resource.Physiotherapist.CreateP
 import com.digitalholics.profileservice.Profile.resource.Physiotherapist.UpdatePhysiotherapistResource;
 import com.digitalholics.profileservice.Shared.Exception.ResourceNotFoundException;
 import com.digitalholics.profileservice.Shared.Exception.ResourceValidationException;
+import com.digitalholics.profileservice.Shared.ExternalConfiguration;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import org.springframework.data.domain.Page;
@@ -19,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @Service
@@ -28,12 +30,14 @@ public class PhysiotherapistServiceImpl implements PhysiotherapistService {
     private final PhysiotherapistRepository physiotherapistRepository;
     private final PatientRepository patientRepository;
     private final Validator validator;
+    private final ExternalConfiguration externalConfiguration;
 
 
-    public PhysiotherapistServiceImpl(PhysiotherapistRepository physiotherapistRepository, PatientRepository patientRepository,Validator validator) {
+    public PhysiotherapistServiceImpl(PhysiotherapistRepository physiotherapistRepository, PatientRepository patientRepository, Validator validator, ExternalConfiguration externalConfiguration) {
         this.physiotherapistRepository = physiotherapistRepository;
         this.patientRepository = patientRepository;
         this.validator = validator;
+        this.externalConfiguration = externalConfiguration;
     }
 
     @Override
@@ -59,7 +63,7 @@ public class PhysiotherapistServiceImpl implements PhysiotherapistService {
 
 
     @Override
-    public Physiotherapist create(CreatePhysiotherapistResource physiotherapistResource) {
+    public Physiotherapist create(CreatePhysiotherapistResource physiotherapistResource, String jwt) {
 
         Set<ConstraintViolation<CreatePhysiotherapistResource>> violations = validator.validate(physiotherapistResource);
 
@@ -69,25 +73,36 @@ public class PhysiotherapistServiceImpl implements PhysiotherapistService {
         Physiotherapist physiotherapistWithDni = physiotherapistRepository.findPhysiotherapistByDni(physiotherapistResource.getDni());
         Patient patientWithDni = patientRepository.findPatientByDni(physiotherapistResource.getDni());
 
-        if(physiotherapistWithDni != null || patientWithDni != null)
+        if (physiotherapistWithDni != null || patientWithDni != null)
             throw new ResourceValidationException(ENTITY,
                     "A physiotherapist with the same Dni first name already exists.");
 
-        Physiotherapist physiotherapist = new Physiotherapist();
-        physiotherapist.setUserId(physiotherapistResource.getUserId());
-        physiotherapist.setAge(physiotherapistResource.getAge());
-        physiotherapist.setDni(physiotherapistResource.getDni());
-        physiotherapist.setLocation(physiotherapistResource.getLocation());
-        physiotherapist.setBirthdayDate(physiotherapistResource.getBirthdayDate());
-        physiotherapist.setPhotoUrl(physiotherapistResource.getPhotoUrl());
-        physiotherapist.setConsultationQuantity(0);
-        physiotherapist.setSpecialization(physiotherapistResource.getSpecialization());
-        physiotherapist.setYearsExperience(physiotherapistResource.getYearsExperience());
-        physiotherapist.setRating(0.0);
-        physiotherapist.setPatientQuantity(0);
-        physiotherapist.setFees(physiotherapistResource.getFees());
+        User user = externalConfiguration.getUser(jwt);
 
-        return physiotherapistRepository.save(physiotherapist);    }
+        System.out.printf(String.valueOf(user));
+
+
+        if (Objects.equals(String.valueOf(user.getRole()), "ADMIN") || Objects.equals(String.valueOf(user.getRole()), "PHYSIOTHERAPIST")) {
+            Physiotherapist physiotherapist = new Physiotherapist();
+            physiotherapist.setUserId(user.getId());
+            physiotherapist.setAge(physiotherapistResource.getAge());
+            physiotherapist.setDni(physiotherapistResource.getDni());
+            physiotherapist.setLocation(physiotherapistResource.getLocation());
+            physiotherapist.setBirthdayDate(physiotherapistResource.getBirthdayDate());
+            physiotherapist.setPhotoUrl(physiotherapistResource.getPhotoUrl());
+            physiotherapist.setConsultationQuantity(0);
+            physiotherapist.setSpecialization(physiotherapistResource.getSpecialization());
+            physiotherapist.setYearsExperience(physiotherapistResource.getYearsExperience());
+            physiotherapist.setRating(0.0);
+            physiotherapist.setPatientQuantity(0);
+            physiotherapist.setFees(physiotherapistResource.getFees());
+
+            return physiotherapistRepository.save(physiotherapist);
+        }else {
+            throw new ResourceValidationException(ENTITY,
+                    "Physiotherapist not crate, because you are not a Physiotherapist.");
+        }
+    }
 
     @Override
     public Physiotherapist update(Integer physiotherapistId, UpdatePhysiotherapistResource request) {

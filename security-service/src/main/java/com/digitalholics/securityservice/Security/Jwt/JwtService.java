@@ -41,7 +41,7 @@ public class JwtService {
     }
 
     public User validateJwtAndGetUser(String jwt) {
-        return jwtValidator.validateJwtAndGetUser(jwt, "ADMIN");
+        return jwtValidator.validateJwtAndGetUser(jwt, "OCAMPO GOD");
     }
 
     public String getToken(UserDetails user) {

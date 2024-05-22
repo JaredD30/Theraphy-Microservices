@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 
+import java.io.Console;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -76,23 +77,29 @@ public class PatientServiceImpl implements PatientService {
 
         Patient patientWithDni = patientRepository.findPatientByDni(patientResource.getDni());
 
-        User user = externalConfiguration.getUser(jwt);
-
         if(patientWithDni != null)
             throw new ResourceValidationException(ENTITY,
                     "A patient with the same Dni first name already exists.");
 
-        Patient patient = new Patient();
-        patient.setAge(patientResource.getAge());
-        patient.setDni(patientResource.getDni());
-        patient.setLocation(patientResource.getLocation());
-        patient.setBirthdayDate(patientResource.getBirthdayDate());
-        patient.setPhotoUrl(patientResource.getPhotoUrl());
-        patient.setAppointmentQuantity(0);
-        patient.setUserId(user.getId());
+        User user = externalConfiguration.getUser(jwt);
 
-        return patientRepository.save(patient);
+        System.out.printf(String.valueOf(user));
 
+        if (Objects.equals(String.valueOf(user.getRole()), "ADMIN") || Objects.equals(String.valueOf(user.getRole()), "PATIENT")) {
+            Patient patient = new Patient();
+            patient.setAge(patientResource.getAge());
+            patient.setDni(patientResource.getDni());
+            patient.setLocation(patientResource.getLocation());
+            patient.setBirthdayDate(patientResource.getBirthdayDate());
+            patient.setPhotoUrl(patientResource.getPhotoUrl());
+            patient.setAppointmentQuantity(0);
+            patient.setUserId(user.getId());
+
+            return patientRepository.save(patient);
+        } else {
+            throw new ResourceValidationException(ENTITY,
+                    "Patient not crate, because you are not a patient.");
+        }
     }
 
     @Override

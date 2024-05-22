@@ -8,6 +8,7 @@ import com.digitalholics.profileservice.Profile.resource.Patient.UpdatePatientRe
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 

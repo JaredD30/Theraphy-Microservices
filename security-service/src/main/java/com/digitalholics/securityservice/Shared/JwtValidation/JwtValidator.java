@@ -46,7 +46,7 @@ public class JwtValidator {
 
         User user = userOptional.orElseThrow(() -> new NotFoundException("User not found for username: " + responseEntity.getBody()));
 
-        if (Objects.equals(String.valueOf(user.getRole()), admittedRole) || Objects.equals(String.valueOf(user.getRole()), "ADMIN")) {
+        if (Objects.equals(String.valueOf(user.getRole()), admittedRole) || Objects.equals(String.valueOf(user.getRole()), "ADMIN")|| Objects.equals(String.valueOf(user.getRole()), "PATIENT") || Objects.equals(String.valueOf(user.getRole()), "PHYSIOTHERAPIST")) {
             return user;
         } else {
             throw new ResourceValidationException("JWT", "Invalid rol.");

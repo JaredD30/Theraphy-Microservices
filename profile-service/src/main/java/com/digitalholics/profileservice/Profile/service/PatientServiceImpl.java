@@ -3,10 +3,14 @@ package com.digitalholics.profileservice.Profile.service;
 
 import com.digitalholics.profileservice.Profile.domain.model.entity.External.User;
 import com.digitalholics.profileservice.Profile.domain.model.entity.Patient;
+import com.digitalholics.profileservice.Profile.domain.model.entity.Physiotherapist;
 import com.digitalholics.profileservice.Profile.domain.persistence.PatientRepository;
 import com.digitalholics.profileservice.Profile.domain.service.PatientService;
+import com.digitalholics.profileservice.Profile.mapping.PatientMapper;
 import com.digitalholics.profileservice.Profile.resource.Patient.CreatePatientResource;
+import com.digitalholics.profileservice.Profile.resource.Patient.PatientResource;
 import com.digitalholics.profileservice.Profile.resource.Patient.UpdatePatientResource;
+import com.digitalholics.profileservice.Profile.resource.Physiotherapist.PhysiotherapistResource;
 import com.digitalholics.profileservice.Shared.Exception.ResourceNotFoundException;
 import com.digitalholics.profileservice.Shared.Exception.ResourceValidationException;
 import com.digitalholics.profileservice.Shared.configuration.ExternalConfiguration;
@@ -29,12 +33,14 @@ public class PatientServiceImpl implements PatientService {
     private final PatientRepository patientRepository;
     private final Validator validator;
     private final ExternalConfiguration externalConfiguration;
+    private final PatientMapper mapper;
 
     @Autowired
-    public PatientServiceImpl(PatientRepository patientRepository, Validator validator, ExternalConfiguration externalConfiguration) {
+    public PatientServiceImpl(PatientRepository patientRepository, Validator validator, ExternalConfiguration externalConfiguration, PatientMapper mapper) {
         this.patientRepository = patientRepository;
         this.validator = validator;
         this.externalConfiguration = externalConfiguration;
+        this.mapper = mapper;
     }
 
     @Override
@@ -46,6 +52,15 @@ public class PatientServiceImpl implements PatientService {
     public Patient getById(Integer patientId) {
         return patientRepository.findById(patientId)
                 .orElseThrow(()-> new ResourceNotFoundException(ENTITY, patientId));
+    }
+
+    @Override
+    public PatientResource getResourceById(Integer patientId) {
+        Patient patient = getById(patientId);
+        PatientResource patientResource = mapper.toResource(patient);
+        User user = externalConfiguration.getUserById(patient.getUserId());
+        patientResource.setUser(user);
+        return patientResource;
     }
 
     @Override

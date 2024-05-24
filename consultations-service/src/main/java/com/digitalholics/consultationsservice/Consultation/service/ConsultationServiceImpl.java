@@ -3,6 +3,7 @@ package com.digitalholics.consultationsservice.Consultation.service;
 
 import com.digitalholics.consultationsservice.Consultation.domain.model.entity.Consultation;
 import com.digitalholics.consultationsservice.Consultation.domain.model.entity.External.Patient;
+import com.digitalholics.consultationsservice.Consultation.domain.model.entity.External.Physiotherapist;
 import com.digitalholics.consultationsservice.Consultation.domain.model.entity.External.User;
 import com.digitalholics.consultationsservice.Consultation.domain.persistence.ConsultationRepository;
 import com.digitalholics.consultationsservice.Consultation.domain.service.ConsultationService;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @Service
@@ -96,15 +98,44 @@ public class ConsultationServiceImpl implements ConsultationService {
         if (!violations.isEmpty())
             throw new ResourceValidationException(ENTITY, violations);
 
-        Consultation consultation = new Consultation();
-        consultation.setPatientId(consultationResource.getPatientId());
-        consultation.setPhysiotherapistId(consultationResource.getPhysiotherapistId());
-        consultation.setDone(consultationResource.getDone());
-        consultation.setTopic(consultationResource.getTopic());
-        consultation.setDiagnosis(consultationResource.getDiagnosis());
-        consultation.setDate(consultationResource.getDate());
-        consultation.setHour(consultationResource.getHour());
-        consultation.setPlace(consultationResource.getPlace());
+        User user = externalConfiguration.getUser(jwt);
+
+        System.out.printf(String.valueOf(user));
+
+        if (Objects.equals(String.valueOf(user.getRole()), "ADMIN") || Objects.equals(String.valueOf(user.getRole()), "PATIENT")) {
+
+            Patient patient = externalConfiguration.getPatientByUserId(jwt,user.getId());
+            System.out.println("GetPatientByUser Id" + patient);
+            Physiotherapist physiotherapist =  externalConfiguration.getPhysiotherapistById(jwt, consultationResource.getPhysiotherapistId());
+            System.out.println("GetPhysioByConsultation" + physiotherapist);
+            User userPhysiotherapist = externalConfiguration.getUserById(physiotherapist.getUser().getId());
+            System.out.println("Este fisio: "+ physiotherapist + " Pertenese a este usuario "+ userPhysiotherapist);
+
+            System.out.println(patient.getId());
+            Consultation consultation = new Consultation();
+            consultation.setPatientId(patient.getId());
+            consultation.setPhysiotherapistId(consultationResource.getPhysiotherapistId());
+            consultation.setDone(consultationResource.getDone());
+            consultation.setTopic(consultationResource.getTopic());
+            consultation.setDiagnosis(consultationResource.getDiagnosis());
+            consultation.setDate(consultationResource.getDate());
+            consultation.setHour(consultationResource.getHour());
+            consultation.setPlace(consultationResource.getPlace());
+
+            //Send email to the user
+            String body = mailService.buildHtmlEmail(user.getFirstname(),consultationResource.getTopic(),consultationResource.getDate(),userPhysiotherapist.getFirstname());
+            try {
+                mailService.sendNewMail(user.getUsername(),"Confirmacion de Consulta",body);
+            }catch (MessagingException e){
+                e.printStackTrace();
+            }
+
+            return consultationRepository.save(consultation);
+        } else {
+            throw new ResourceValidationException(ENTITY,
+                    "Consultation not crate, because you are not a patient.");
+        }
+
 
         //Aumento de la cantidad de consultas de un fisio
 
@@ -112,18 +143,6 @@ public class ConsultationServiceImpl implements ConsultationService {
 
         //Aumento de cantidad de pacientes de un fisio
 
-        //Send email to the user
-
-        User user = externalConfiguration.getUser(jwt);
-
-        String body = mailService.buildHtmlEmail(user.getFirstname(),consultationResource.getTopic(),consultationResource.getDate(),"1");
-        try {
-            mailService.sendNewMail(user.getUsername(),"Confirmacion de Consulta",body);
-        }catch (MessagingException e){
-            e.printStackTrace();
-        }
-
-        return consultationRepository.save(consultation);
     }
 
     @Override

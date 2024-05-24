@@ -7,7 +7,9 @@ import com.digitalholics.profileservice.Profile.domain.model.entity.Physiotherap
 import com.digitalholics.profileservice.Profile.domain.persistence.PatientRepository;
 import com.digitalholics.profileservice.Profile.domain.persistence.PhysiotherapistRepository;
 import com.digitalholics.profileservice.Profile.domain.service.PhysiotherapistService;
+import com.digitalholics.profileservice.Profile.mapping.PhysiotherapistMapper;
 import com.digitalholics.profileservice.Profile.resource.Physiotherapist.CreatePhysiotherapistResource;
+import com.digitalholics.profileservice.Profile.resource.Physiotherapist.PhysiotherapistResource;
 import com.digitalholics.profileservice.Profile.resource.Physiotherapist.UpdatePhysiotherapistResource;
 import com.digitalholics.profileservice.Shared.Exception.ResourceNotFoundException;
 import com.digitalholics.profileservice.Shared.Exception.ResourceValidationException;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -31,13 +34,15 @@ public class PhysiotherapistServiceImpl implements PhysiotherapistService {
     private final PatientRepository patientRepository;
     private final Validator validator;
     private final ExternalConfiguration externalConfiguration;
+    private final PhysiotherapistMapper mapper;
 
 
-    public PhysiotherapistServiceImpl(PhysiotherapistRepository physiotherapistRepository, PatientRepository patientRepository, Validator validator, ExternalConfiguration externalConfiguration) {
+    public PhysiotherapistServiceImpl(PhysiotherapistRepository physiotherapistRepository, PatientRepository patientRepository, Validator validator, ExternalConfiguration externalConfiguration, PhysiotherapistMapper mapper) {
         this.physiotherapistRepository = physiotherapistRepository;
         this.patientRepository = patientRepository;
         this.validator = validator;
         this.externalConfiguration = externalConfiguration;
+        this.mapper = mapper;
     }
 
     @Override
@@ -52,9 +57,18 @@ public class PhysiotherapistServiceImpl implements PhysiotherapistService {
     }
 
     @Override
-    public Physiotherapist getById( Integer patientId) {
+    public Physiotherapist getById(Integer patientId) {
         return physiotherapistRepository.findById(patientId)
                 .orElseThrow(()-> new ResourceNotFoundException(ENTITY, patientId));    }
+
+    @Override
+    public PhysiotherapistResource getResourceById(Integer patientId) {
+        Physiotherapist physiotherapist = getById(patientId);
+        PhysiotherapistResource physiotherapistResource = mapper.toResource(physiotherapist);
+        User user = externalConfiguration.getUserById(physiotherapist.getUserId());
+        physiotherapistResource.setUser(user);
+        return physiotherapistResource;
+    }
 
     @Override
     public Physiotherapist getByUserId(Integer userId) {

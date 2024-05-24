@@ -129,6 +129,4 @@ public class AuthService {
 
         return Optional.empty();
     }
-
-
 }

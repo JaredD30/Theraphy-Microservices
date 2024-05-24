@@ -16,5 +16,4 @@ public class CreateConsultationResource {
     private String hour;
     private String place;
     private Integer physiotherapistId;
-    private Integer patientId;
 }

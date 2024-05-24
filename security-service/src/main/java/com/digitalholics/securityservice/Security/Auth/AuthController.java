@@ -7,6 +7,7 @@ import com.digitalholics.securityservice.Security.Domain.Service.Communication.R
 import com.digitalholics.securityservice.Security.Jwt.JwtService;
 import com.digitalholics.securityservice.Security.Resource.UserResource;
 import com.digitalholics.securityservice.Security.mapping.UserMapper;
+import com.digitalholics.securityservice.Shared.Exception.ResourceValidationException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -118,6 +119,22 @@ public class AuthController {
         }
         User username = jwtService.validateJwtAndGetUser(jwt);
         return username != null ? mapper.toResource(username) : null;
+    }
+
+    @GetMapping("/user/{id}")
+    public UserResource getUserById(
+            @PathVariable Integer id,
+            @RequestHeader("Authorization") String jwt) {
+        if (jwt != null && jwt.startsWith("Bearer ")) {
+            jwt = jwt.substring(7); // Quita los primeros 7 caracteres ("Bearer ")
+        }
+        User username = jwtService.validateJwtAndGetUser(jwt);
+
+        if (username.getId().equals(id)){
+            return username != null ? mapper.toResource(username) : null;
+        }   throw new ResourceValidationException(
+                "User not found for this Id");
+
     }
 
 }

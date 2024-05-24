@@ -20,6 +20,6 @@ public class Physiotherapist {
     private Integer patientQuantity;
     private Integer yearsExperience;
     private Double fees;
-    private User user;
+    private Integer userId;
 
 }

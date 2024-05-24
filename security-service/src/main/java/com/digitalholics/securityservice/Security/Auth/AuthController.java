@@ -108,7 +108,8 @@ public class AuthController {
             jwt = jwt.substring(7); // Quita los primeros 7 caracteres ("Bearer ")
         }
         String username = jwtService.validateJwtAndGetUsername(jwt);
-        return username != null ? username : jwt;
+
+        return username;
     }
 
     @GetMapping("/get-user")
@@ -123,18 +124,9 @@ public class AuthController {
 
     @GetMapping("/user/{id}")
     public UserResource getUserById(
-            @PathVariable Integer id,
-            @RequestHeader("Authorization") String jwt) {
-        if (jwt != null && jwt.startsWith("Bearer ")) {
-            jwt = jwt.substring(7); // Quita los primeros 7 caracteres ("Bearer ")
-        }
-        User username = jwtService.validateJwtAndGetUser(jwt);
-
-        if (username.getId().equals(id)){
-            return username != null ? mapper.toResource(username) : null;
-        }   throw new ResourceValidationException(
-                "User not found for this Id");
-
+            @PathVariable Integer id
+    ) {
+        return mapper.toResource(authService.getByUserId(id));
     }
 
 }

@@ -58,9 +58,9 @@ public class PhysiotherapistController {
     @GetMapping("{physiotherapistId}")
     //@PreAuthorize("hasAuthority('patient:read')")
     public PhysiotherapistResource getPhysiotherapistById(
-            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
-            @Parameter(description = "Physiotherapist Id", required = true, examples = @ExampleObject(name = "physiotherapistId", value = "1")) @PathVariable Integer physiotherapistId) {
-        return mapper.toResource(physiotherapistService.getById(physiotherapistId));
+            @PathVariable Integer physiotherapistId)
+    {
+        return physiotherapistService.getResourceById(physiotherapistId);
     }
 
     @Operation(summary = "Get physiotherapist by user id", description = "Returns physiotherapist with a provide user id")

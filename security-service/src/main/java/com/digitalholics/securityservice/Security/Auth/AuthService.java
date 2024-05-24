@@ -120,7 +120,6 @@ public class AuthService {
         }
     }
 
-
     public Optional<User> getByUsername(String username){
         if (username != null){
             var user = this.userRepository.findByUsername(username);
@@ -129,4 +128,9 @@ public class AuthService {
 
         return Optional.empty();
     }
+
+    public User getByUserId (Integer id){
+        return userRepository.findUserById(id);
+    }
+
 }

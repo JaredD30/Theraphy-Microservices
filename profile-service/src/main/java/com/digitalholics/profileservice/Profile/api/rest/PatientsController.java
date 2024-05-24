@@ -48,9 +48,9 @@ public class PatientsController {
     })
     @GetMapping("{patientId}")
     public PatientResource getPatientById(
-            @Parameter(description = "Patient Id", required = true, examples = @ExampleObject(name = "patientId", value = "1")) @PathVariable Integer patientId
+            @PathVariable Integer patientId
     ) {
-        return mapper.toResource(patientService.getById( patientId));
+        return patientService.getResourceById(patientId);
     }
 
     @Operation(summary = "Get patient by user id", description = "Returns patient with a provide user id")

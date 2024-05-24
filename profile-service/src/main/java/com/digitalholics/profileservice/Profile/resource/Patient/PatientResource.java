@@ -1,5 +1,6 @@
 package com.digitalholics.profileservice.Profile.resource.Patient;
 
+import com.digitalholics.profileservice.Profile.domain.model.entity.External.User;
 import lombok.*;
 
 @Getter
@@ -15,4 +16,5 @@ public class PatientResource {
     private String birthdayDate;
     private Integer appointmentQuantity;
     private String location;
+    private User user;
 }

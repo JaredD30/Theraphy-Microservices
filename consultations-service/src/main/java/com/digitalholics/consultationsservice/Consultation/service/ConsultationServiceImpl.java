@@ -108,9 +108,10 @@ public class ConsultationServiceImpl implements ConsultationService {
             System.out.println("GetPatientByUser Id" + patient);
             Physiotherapist physiotherapist =  externalConfiguration.getPhysiotherapistById(jwt, consultationResource.getPhysiotherapistId());
             System.out.println("GetPhysioByConsultation" + physiotherapist);
-            User userPhysiotherapist = externalConfiguration.getUserById(jwt, physiotherapist.getUserId());
+            User userPhysiotherapist = externalConfiguration.getUserById(physiotherapist.getUser().getId());
             System.out.println("Este fisio: "+ physiotherapist + " Pertenese a este usuario "+ userPhysiotherapist);
 
+            System.out.println(patient.getId());
             Consultation consultation = new Consultation();
             consultation.setPatientId(patient.getId());
             consultation.setPhysiotherapistId(consultationResource.getPhysiotherapistId());

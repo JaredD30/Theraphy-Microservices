@@ -50,12 +50,10 @@ public class ExternalConfiguration {
         return response.getBody();
     }
 
-    public User getUserById(String jwt, Integer id) {
+    public User getUserById(Integer id) {
         String userServiceUrl = "http://security-service/api/v1/security/auth/user/"+id;
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + jwt);
         HttpEntity<String> entity = new HttpEntity<>(headers);
-
         ResponseEntity<User> response = restTemplate.exchange(userServiceUrl, HttpMethod.GET, entity, User.class);
         return response.getBody();
     }

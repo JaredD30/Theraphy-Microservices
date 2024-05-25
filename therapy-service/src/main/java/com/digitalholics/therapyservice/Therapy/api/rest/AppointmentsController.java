@@ -155,20 +155,20 @@ public class AppointmentsController {
         return appointmentService.delete(appointmentId);
     }
 
-    @Operation(summary = "Update appointment's diagnosis", description = "Updates an appointment's diagnosis")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully updated"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = { @Content(schema = @Schema()) }),
-            @ApiResponse(responseCode = "403", description = "Forbidden", content = { @Content(schema = @Schema()) }),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = { @Content(schema = @Schema()) })
-    })
-    @PatchMapping("updateDiagnosis/{appointmentId}")
-    public ResponseEntity<AppointmentResource> updateConsultationDiagnosis(
-            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
-            @Parameter(description = "Appointment Id", required = true, examples = @ExampleObject(name = "appointmentId", value = "1")) @PathVariable Integer appointmentId,
-            @RequestBody String diagnosis) {
-
-        return new  ResponseEntity<>(mapper.toResource(appointmentService.updateDiagnosis(appointmentId,diagnosis)), HttpStatus.CREATED);
-    }
+//    @Operation(summary = "Update appointment's diagnosis", description = "Updates an appointment's diagnosis")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "Successfully updated"),
+//            @ApiResponse(responseCode = "401", description = "Unauthorized", content = { @Content(schema = @Schema()) }),
+//            @ApiResponse(responseCode = "403", description = "Forbidden", content = { @Content(schema = @Schema()) }),
+//            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = { @Content(schema = @Schema()) })
+//    })
+//    @PatchMapping("updateDiagnosis/{appointmentId}")
+//    public ResponseEntity<AppointmentResource> updateConsultationDiagnosis(
+//            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
+//            @Parameter(description = "Appointment Id", required = true, examples = @ExampleObject(name = "appointmentId", value = "1")) @PathVariable Integer appointmentId,
+//            @RequestBody String diagnosis) {
+//
+//        return new  ResponseEntity<>(mapper.toResource(appointmentService.updateDiagnosis(appointmentId,diagnosis)), HttpStatus.CREATED);
+//    }
 
 }

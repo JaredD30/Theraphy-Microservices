@@ -30,6 +30,6 @@ public interface AppointmentService {
 
     Appointment getAppointmentByDateAndTherapyId(Integer therapyId, String date);
 
-    Appointment updateDiagnosis(Integer appointmentId, String diagnosis);
+    //Appointment updateDiagnosis(Integer appointmentId, String diagnosis);
 
 }

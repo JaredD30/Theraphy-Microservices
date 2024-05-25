@@ -3,7 +3,7 @@ package com.digitalholics.therapyservice.Therapy.service;
 import com.digitalholics.therapyservice.Shared.Exception.ResourceNotFoundException;
 import com.digitalholics.therapyservice.Shared.Exception.ResourceValidationException;
 import com.digitalholics.therapyservice.Shared.Exception.UnauthorizedException;
-import com.digitalholics.therapyservice.Shared.JwtValidation.JwtValidator;
+import com.digitalholics.therapyservice.Shared.configuration.ExternalConfiguration;
 import com.digitalholics.therapyservice.Therapy.domain.model.entity.External.User;
 import com.digitalholics.therapyservice.Therapy.domain.model.entity.Therapy;
 import com.digitalholics.therapyservice.Therapy.domain.model.entity.Treatment;
@@ -18,8 +18,6 @@ import jakarta.ws.rs.NotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,14 +33,16 @@ public class TreatmentServiceImpl implements TreatmentService {
 
     private final TreatmentRepository treatmentRepository;
     private final TherapyRepository therapyRepository;
-    private final JwtValidator jwtValidator;
     private final Validator validator;
 
-    public TreatmentServiceImpl(TreatmentRepository treatmentRepository, TherapyRepository therapyRepository, JwtValidator jwtValidator, Validator validator) {
+    private final ExternalConfiguration externalConfiguration;
+
+
+    public TreatmentServiceImpl(TreatmentRepository treatmentRepository, TherapyRepository therapyRepository, Validator validator, ExternalConfiguration externalConfiguration) {
         this.treatmentRepository = treatmentRepository;
         this.therapyRepository = therapyRepository;
-        this.jwtValidator = jwtValidator;
         this.validator = validator;
+        this.externalConfiguration = externalConfiguration;
     }
 
     @Override
@@ -78,7 +78,7 @@ public class TreatmentServiceImpl implements TreatmentService {
         if (!violations.isEmpty())
             throw new ResourceValidationException(ENTITY, violations);
 
-        User user = jwtValidator.validateJwtAndGetUser(jwt, "PHYSIOTHERAPIST");
+        User user = externalConfiguration.getUser(jwt);
 
         Optional<Therapy> therapyOptional = therapyRepository.findById(treatmentResource.getTherapyId());
 
@@ -86,7 +86,7 @@ public class TreatmentServiceImpl implements TreatmentService {
 
         Treatment treatment = new Treatment();
 
-        if (therapy.getPhysiotherapist().getUser().getUsername().equals(user.getUsername())){
+        if (externalConfiguration.getPhysiotherapistById(jwt, therapy.getPhysiotherapistId()).getUser().getUsername().equals(user.getUsername())){
             treatment.setTherapy(therapy);
             treatment.setDay(treatmentResource.getDay());
             treatment.setDescription(treatmentResource.getDescription());

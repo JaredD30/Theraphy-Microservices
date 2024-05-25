@@ -2,14 +2,12 @@ package com.digitalholics.therapyservice.Therapy.service;
 
 import com.digitalholics.therapyservice.Shared.Exception.ResourceNotFoundException;
 import com.digitalholics.therapyservice.Shared.Exception.ResourceValidationException;
-import com.digitalholics.therapyservice.Shared.JwtValidation.JwtValidator;
+import com.digitalholics.therapyservice.Shared.configuration.ExternalConfiguration;
 import com.digitalholics.therapyservice.Therapy.domain.model.entity.External.Patient;
 import com.digitalholics.therapyservice.Therapy.domain.model.entity.External.Physiotherapist;
 import com.digitalholics.therapyservice.Therapy.domain.model.entity.External.User;
 import com.digitalholics.therapyservice.Therapy.domain.model.entity.Therapy;
-import com.digitalholics.therapyservice.Therapy.domain.persistence.External.PatientRepository;
-import com.digitalholics.therapyservice.Therapy.domain.persistence.External.PhysiotherapistRepository;
-import com.digitalholics.therapyservice.Therapy.domain.persistence.External.UserRepository;
+
 import com.digitalholics.therapyservice.Therapy.domain.persistence.TherapyRepository;
 import com.digitalholics.therapyservice.Therapy.domain.service.TherapyService;
 import com.digitalholics.therapyservice.Therapy.resource.Therapy.CreateTherapyResource;
@@ -20,12 +18,10 @@ import jakarta.ws.rs.NotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -37,22 +33,15 @@ public class TherapyServiceImpl implements TherapyService {
 
     private final TherapyRepository therapyRepository;
 
-    private final PatientRepository patientRepository;
-
-    private final PhysiotherapistRepository physiotherapistRepository;
-
-    private final UserRepository userRepository;
-
-    private final JwtValidator jwtValidator;
     private final Validator validator;
 
-    public TherapyServiceImpl(TherapyRepository therapyRepository, PatientRepository patientRepository, PhysiotherapistRepository physiotherapistRepository, UserRepository userRepository, JwtValidator jwtValidator, Validator validator) {
+    private final ExternalConfiguration externalConfiguration;
+
+
+    public TherapyServiceImpl(TherapyRepository therapyRepository, Validator validator, ExternalConfiguration externalConfiguration) {
         this.therapyRepository = therapyRepository;
-        this.patientRepository = patientRepository;
-        this.physiotherapistRepository = physiotherapistRepository;
-        this.userRepository = userRepository;
-        this.jwtValidator = jwtValidator;
         this.validator = validator;
+        this.externalConfiguration = externalConfiguration;
     }
 
 
@@ -75,9 +64,9 @@ public class TherapyServiceImpl implements TherapyService {
     @Override
     public Therapy getActiveTherapyByPatientId(String jwt) {
 
-        User user = jwtValidator.validateJwtAndGetUser(jwt, "PATIENT");
+        User user = externalConfiguration.getUser(jwt);
 
-        Optional<Patient> patientOptional = patientRepository.findByUserId(user.getId());
+        Optional<Patient> patientOptional = Optional.ofNullable(externalConfiguration.getPatientByUserId(jwt, user.getId()));
         Patient patient = patientOptional.orElseThrow(() -> new NotFoundException("User not found patient for id: " + user.getId()));
 
         return therapyRepository.findActiveTherapyByPatientId(patient.getId());
@@ -97,27 +86,32 @@ public class TherapyServiceImpl implements TherapyService {
        if(!violations.isEmpty())
            throw new ResourceValidationException(ENTITY, violations);
 
-        User user = jwtValidator.validateJwtAndGetUser(jwt, "PHYSIOTHERAPIST");
+        User user = externalConfiguration.getUser(jwt);
 
-        Optional<Patient> patientOptional = patientRepository.findById(therapyResource.getPatientId());
-        Optional<Physiotherapist> physiotherapistOptional = Optional.ofNullable(physiotherapistRepository.findPhysiotherapistByUserUsername(user.getUsername()));
+        if (Objects.equals(String.valueOf(user.getRole()), "ADMIN") || Objects.equals(String.valueOf(user.getRole()), "PHYSIOTHERAPIST")) {
 
-        Patient patient = patientOptional.orElseThrow(()-> new NotFoundException("This patient not found with ID: "+ therapyResource.getPatientId()));
-        Physiotherapist physiotherapist = physiotherapistOptional.orElseThrow(()->new NotFoundException("This physiotherapist not found with ID: "+ user.getUsername()));
+            Physiotherapist physiotherapist = externalConfiguration.getPhysiotherapistByUserId(jwt,user.getId());
+            //Patient patient =  externalConfiguration.getPatientByUserId(jwt, therapyResource.getPatientId());
+            //User userPatient = externalConfiguration.getUserById(patient.getUser().getId());
 
-        Therapy therapy = new Therapy();
-        therapy.setTherapyName(therapyResource.getTherapyName());
-        therapy.setDescription(therapyResource.getDescription());
-        therapy.setAppointmentQuantity(therapyResource.getAppointmentQuantity());
-        therapy.setStartAt(therapyResource.getStartAt());
-        therapy.setFinishAt(therapyResource.getFinishAt());
-        therapy.setFinished(therapyResource.getFinished());
-        therapy.setPatient(patient);
-        therapy.setPhysiotherapist(physiotherapist);
+            //physiotherapist.getId()
+            Therapy therapy = new Therapy();
+            therapy.setTherapyName(therapyResource.getTherapyName());
+            therapy.setDescription(therapyResource.getDescription());
+            therapy.setAppointmentQuantity(therapyResource.getAppointmentQuantity());
+            therapy.setStartAt(therapyResource.getStartAt());
+            therapy.setFinishAt(therapyResource.getFinishAt());
+            therapy.setFinished(therapyResource.getFinished());
+            therapy.setPatientId(therapyResource.getPatientId());
+            therapy.setPhysiotherapistId(physiotherapist.getId());
 
 
+            return therapyRepository.save(therapy);
+        } else {
+            throw new ResourceValidationException(ENTITY,
+                    "Appointment not created, because you are not a physiotherapist.");
+        }
 
-       return therapyRepository.save(therapy);
     }
 
     @Override

@@ -1,7 +1,7 @@
 package com.digitalholics.therapyservice.Therapy.resource.Therapy;
 
-import com.digitalholics.therapyservice.Therapy.resource.External.PatientResource;
-import com.digitalholics.therapyservice.Therapy.resource.External.PhysiotherapistResource;
+import com.digitalholics.therapyservice.Therapy.domain.model.entity.External.Patient;
+import com.digitalholics.therapyservice.Therapy.domain.model.entity.External.Physiotherapist;
 import lombok.*;
 
 @Getter
@@ -17,6 +17,6 @@ public class TherapyResource {
     private String startAt;
     private String finishAt;
     private Boolean finished;
-    private PatientResource patient;
-    private PhysiotherapistResource physiotherapist;
+    private Patient patient;
+    private Physiotherapist physiotherapist;
 }

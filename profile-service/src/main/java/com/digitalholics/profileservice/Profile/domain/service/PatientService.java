@@ -12,6 +12,9 @@ import org.springframework.http.ResponseEntity;
 public interface PatientService {
     Page<Patient> getAll(Pageable pageable);
     Patient getById( Integer patientId);
+
+    PatientResource getLoggedInPatient(String jwt);
+
     Patient getByDni(String dni);
     Patient getByUserId( Integer userId);
     PatientResource getResourceById(Integer id);

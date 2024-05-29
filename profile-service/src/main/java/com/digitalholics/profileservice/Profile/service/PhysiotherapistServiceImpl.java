@@ -62,6 +62,19 @@ public class PhysiotherapistServiceImpl implements PhysiotherapistService {
                 .orElseThrow(()-> new ResourceNotFoundException(ENTITY, patientId));    }
 
     @Override
+    public PhysiotherapistResource getLoggedInPhysiotherapist(String jwt) {
+        User user = externalConfiguration.getUser(jwt);
+        if (Objects.equals(String.valueOf(user.getRole()), "ADMIN") || Objects.equals(String.valueOf(user.getRole()), "PHYSIOTHERAPIST")) {
+            Optional<Physiotherapist> physiotherapistOptional = physiotherapistRepository.findByUserId(user.getId());
+            Physiotherapist physiotherapist = physiotherapistOptional.orElseThrow(() -> new ResourceNotFoundException("Not found a physiotherapist autenticated."));
+            PhysiotherapistResource physiotherapistResource  = mapper.toResource(physiotherapist);
+            physiotherapistResource.setUser(user);
+            return physiotherapistResource;
+        }
+        throw new ResourceNotFoundException("Not found a physiotherapist autenticated.");
+    }
+
+    @Override
     public PhysiotherapistResource getResourceById(Integer patientId) {
         Physiotherapist physiotherapist = getById(patientId);
         PhysiotherapistResource physiotherapistResource = mapper.toResource(physiotherapist);

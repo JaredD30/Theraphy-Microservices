@@ -53,6 +53,16 @@ public class PatientsController {
         return patientService.getResourceById(patientId);
     }
 
+    @GetMapping("/PatientLogget")
+    public PatientResource getPatientLogget(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader
+    ) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            authorizationHeader = authorizationHeader.substring(7); // Quita "Bearer " del token
+        }
+        return patientService.getLoggedInPatient(authorizationHeader);
+    }
+
     @Operation(summary = "Get patient by user id", description = "Returns patient with a provide user id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully got"),

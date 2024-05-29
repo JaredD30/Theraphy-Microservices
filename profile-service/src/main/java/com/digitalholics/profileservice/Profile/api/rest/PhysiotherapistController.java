@@ -63,6 +63,16 @@ public class PhysiotherapistController {
         return physiotherapistService.getResourceById(physiotherapistId);
     }
 
+    @GetMapping("/PhysiotherapistLogget")
+    public PhysiotherapistResource getPatientLogget(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader
+    ) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            authorizationHeader = authorizationHeader.substring(7); // Quita "Bearer " del token
+        }
+        return physiotherapistService.getLoggedInPhysiotherapist(authorizationHeader);
+    }
+
     @Operation(summary = "Get physiotherapist by user id", description = "Returns physiotherapist with a provide user id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully got"),

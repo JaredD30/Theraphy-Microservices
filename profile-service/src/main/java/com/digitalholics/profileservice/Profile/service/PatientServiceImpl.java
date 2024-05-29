@@ -3,14 +3,12 @@ package com.digitalholics.profileservice.Profile.service;
 
 import com.digitalholics.profileservice.Profile.domain.model.entity.External.User;
 import com.digitalholics.profileservice.Profile.domain.model.entity.Patient;
-import com.digitalholics.profileservice.Profile.domain.model.entity.Physiotherapist;
 import com.digitalholics.profileservice.Profile.domain.persistence.PatientRepository;
 import com.digitalholics.profileservice.Profile.domain.service.PatientService;
 import com.digitalholics.profileservice.Profile.mapping.PatientMapper;
 import com.digitalholics.profileservice.Profile.resource.Patient.CreatePatientResource;
 import com.digitalholics.profileservice.Profile.resource.Patient.PatientResource;
 import com.digitalholics.profileservice.Profile.resource.Patient.UpdatePatientResource;
-import com.digitalholics.profileservice.Profile.resource.Physiotherapist.PhysiotherapistResource;
 import com.digitalholics.profileservice.Shared.Exception.ResourceNotFoundException;
 import com.digitalholics.profileservice.Shared.Exception.ResourceValidationException;
 import com.digitalholics.profileservice.Shared.configuration.ExternalConfiguration;
@@ -24,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -61,6 +60,19 @@ public class PatientServiceImpl implements PatientService {
         User user = externalConfiguration.getUserById(patient.getUserId());
         patientResource.setUser(user);
         return patientResource;
+    }
+
+    @Override
+    public PatientResource getLoggedInPatient(String jwt) {
+        User user = externalConfiguration.getUser(jwt);
+        if (Objects.equals(String.valueOf(user.getRole()), "ADMIN") || Objects.equals(String.valueOf(user.getRole()), "PATIENT")) {
+            Optional<Patient> patientOptional = patientRepository.findByUserId(user.getId());
+            Patient patient = patientOptional.orElseThrow(() -> new ResourceNotFoundException("No se encontró un paciente autenticado."));
+            PatientResource patientResource  = mapper.toResource(patient);
+            patientResource.setUser(user);
+            return patientResource;
+        }
+        throw new ResourceNotFoundException("No se encontró un paciente autenticado.");
     }
 
     @Override

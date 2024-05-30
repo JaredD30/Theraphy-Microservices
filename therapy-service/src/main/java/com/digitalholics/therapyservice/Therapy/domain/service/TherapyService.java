@@ -23,6 +23,8 @@ public interface TherapyService {
 
     Therapy getById(Integer therapyId);
 
+    TherapyResource getResourceById(String jwt, Integer therapyId);
+
     Therapy create(String jwt, CreateTherapyResource therapy);
     Therapy update(Integer therapyId, UpdateTherapyResource request);
 

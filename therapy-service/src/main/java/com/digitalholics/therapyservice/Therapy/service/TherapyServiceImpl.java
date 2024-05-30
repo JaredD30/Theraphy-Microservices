@@ -98,6 +98,14 @@ public class TherapyServiceImpl implements TherapyService {
     }
 
     @Override
+    public TherapyResource getResourceById(String jwt, Integer therapyId) {
+        TherapyResource therapy = mapper.toResource(getById(therapyId));
+        therapy.setPatient(externalConfiguration.getPatientByID(jwt, therapy.getPatient().getId()));
+        therapy.setPhysiotherapist(externalConfiguration.getPhysiotherapistById(jwt, therapy.getPhysiotherapist().getId()));
+        return therapy;
+    }
+
+    @Override
     public Therapy create(String jwt, CreateTherapyResource therapyResource) {
        Set<ConstraintViolation<CreateTherapyResource>> violations = validator.validate(therapyResource);
 

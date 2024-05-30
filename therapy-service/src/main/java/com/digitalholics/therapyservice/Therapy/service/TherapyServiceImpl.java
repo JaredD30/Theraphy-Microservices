@@ -80,6 +80,20 @@ public class TherapyServiceImpl implements TherapyService {
     }
 
     @Override
+    public Page<TherapyResource> getResourceByPatientId(String jwt, Pageable pageable, Integer patientId) {
+        Page<TherapyResource> theraphies =
+                mapper.modelListPage(getTherapyByPatientId(patientId), pageable);
+        theraphies.forEach(therapyResource -> {
+            therapyResource.setPatient(externalConfiguration.getPatientByID(jwt, therapyResource.getPatient().getId()));
+            therapyResource.setPhysiotherapist(externalConfiguration.getPhysiotherapistById(jwt, therapyResource.getPhysiotherapist().getId()));
+        });
+
+        return theraphies;
+    }
+
+
+
+    @Override
     public Therapy getActiveTherapyByPatientId(String jwt) {
 
         User user = externalConfiguration.getUser(jwt);

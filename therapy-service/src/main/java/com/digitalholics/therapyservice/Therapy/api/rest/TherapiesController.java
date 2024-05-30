@@ -90,7 +90,12 @@ public class TherapiesController {
     @GetMapping("activeTherapyByPatientId")
     public TherapyResource getActiveTherapyByPatientId(
             @Parameter(hidden = true) @RequestHeader("Authorization") String jwt) {
-        return mapper.toResource(therapyService.getActiveTherapyByPatientId(jwt));
+       // return mapper.toResource(therapyService.getActiveTherapyByPatientId(jwt));
+
+        if (jwt != null && jwt.startsWith("Bearer ")) {
+            jwt = jwt.substring(7); // Quita "Bearer " del token
+        }
+        return therapyService.getResourceActiveByPatientId(jwt);
     }
 
     @Operation(summary = "Create therapy", description = "Register a therapy")

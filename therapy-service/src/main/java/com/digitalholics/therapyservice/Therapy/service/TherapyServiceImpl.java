@@ -180,6 +180,9 @@ public class TherapyServiceImpl implements TherapyService {
         if (request.getFinishAt() != null) {
             therapy.setFinishAt(request.getFinishAt());
         }
+        if (request.getFinished() != null) {
+            therapy.setFinished(request.getFinished());
+        }
 
 
         return therapyRepository.save(therapy);

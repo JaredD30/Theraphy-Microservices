@@ -46,7 +46,8 @@ public class TherapiesController {
     @GetMapping
     public Page<TherapyResource> getAllTherapies(
             @Parameter(hidden = true) @RequestHeader("Authorization") String jwt, Pageable pageable) {
-        return mapper.modelListPage(therapyService.getAll(), pageable);
+        //return mapper.modelListPage(therapyService.getAll(), pageable);
+        return therapyService.getAllResources(jwt, pageable);
     }
 
     @Operation(summary = "Get therapy by id", description = "Returns therapy with a provided id")

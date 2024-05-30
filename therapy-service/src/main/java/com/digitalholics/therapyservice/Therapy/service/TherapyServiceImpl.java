@@ -10,7 +10,9 @@ import com.digitalholics.therapyservice.Therapy.domain.model.entity.Therapy;
 
 import com.digitalholics.therapyservice.Therapy.domain.persistence.TherapyRepository;
 import com.digitalholics.therapyservice.Therapy.domain.service.TherapyService;
+import com.digitalholics.therapyservice.Therapy.mapping.TherapyMapper;
 import com.digitalholics.therapyservice.Therapy.resource.Therapy.CreateTherapyResource;
+import com.digitalholics.therapyservice.Therapy.resource.Therapy.TherapyResource;
 import com.digitalholics.therapyservice.Therapy.resource.Therapy.UpdateTherapyResource;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
@@ -38,10 +40,14 @@ public class TherapyServiceImpl implements TherapyService {
     private final ExternalConfiguration externalConfiguration;
 
 
-    public TherapyServiceImpl(TherapyRepository therapyRepository, Validator validator, ExternalConfiguration externalConfiguration) {
+    private final TherapyMapper mapper;
+
+
+    public TherapyServiceImpl(TherapyRepository therapyRepository, Validator validator, ExternalConfiguration externalConfiguration, TherapyMapper mapper) {
         this.therapyRepository = therapyRepository;
         this.validator = validator;
         this.externalConfiguration = externalConfiguration;
+        this.mapper = mapper;
     }
 
 
@@ -49,6 +55,18 @@ public class TherapyServiceImpl implements TherapyService {
     @Override
     public List<Therapy> getAll() {
         return therapyRepository.findAll();
+    }
+
+    @Override
+    public Page<TherapyResource> getAllResources(String jwt, Pageable pageable) {
+        Page<TherapyResource> theraphies =
+        mapper.modelListPage(getAll(), pageable);
+        theraphies.forEach(therapyResource -> {
+            therapyResource.setPatient(externalConfiguration.getPatientByID(jwt, therapyResource.getPatient().getId()));
+            therapyResource.setPhysiotherapist(externalConfiguration.getPhysiotherapistById(jwt, therapyResource.getPhysiotherapist().getId()));
+        });
+
+        return theraphies;
     }
 
     @Override

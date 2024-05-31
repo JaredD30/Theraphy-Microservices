@@ -123,6 +123,9 @@ public class AppointmentsController {
     @PostMapping
     public ResponseEntity<AppointmentResource> createAppointment(
             @Parameter(hidden = true) @RequestHeader("Authorization") String jwt, @RequestBody CreateAppointmentResource resource) {
+        if (jwt != null && jwt.startsWith("Bearer ")) {
+            jwt = jwt.substring(7); // Quita "Bearer " del token
+        }
         return new ResponseEntity<>(mapper.toResource(appointmentService.create(jwt,(resource))), HttpStatus.CREATED);
     }
 

@@ -7,6 +7,7 @@ import com.digitalholics.therapyservice.Shared.configuration.ExternalConfigurati
 import com.digitalholics.therapyservice.Therapy.domain.model.entity.Appointment;
 import com.digitalholics.therapyservice.Therapy.domain.model.entity.External.User;
 import com.digitalholics.therapyservice.Therapy.domain.model.entity.Therapy;
+import com.digitalholics.therapyservice.Therapy.domain.model.entity.Treatment;
 import com.digitalholics.therapyservice.Therapy.domain.persistence.AppointmentRepository;
 import com.digitalholics.therapyservice.Therapy.domain.persistence.TherapyRepository;
 import com.digitalholics.therapyservice.Therapy.domain.service.AppointmentService;
@@ -72,18 +73,13 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         User user = externalConfiguration.getUser(jwt);
 
-        Appointment appointmentWithTopic = appointmentRepository.findByTopic(appointmentResource.getTopic());
-
-        if(appointmentWithTopic != null)
-            throw new ResourceValidationException(ENTITY,
-                    "A Appointment with the same topic already exists.");
-
         Optional<Therapy> therapyOptional = therapyRepository.findById(appointmentResource.getTherapyId());
 
-        Therapy therapy = therapyOptional.orElseThrow(()-> new NotFoundException("This therapy not found with ID: "+ appointmentResource.getTherapyId()));
+        Therapy therapy = therapyOptional.orElseThrow(() -> new NotFoundException("Therapy not found with ID: " + appointmentResource.getTherapyId()));
+
         Appointment appointment = new Appointment();
 
-        if (externalConfiguration.getPatientByID(jwt, therapy.getPatientId()).getUser().getUsername().equals(user.getUsername()) || externalConfiguration.getPhysiotherapistById(jwt, therapy.getPhysiotherapistId()).getUser().getUsername().equals(user.getUsername())){
+        if (externalConfiguration.getPhysiotherapistById(jwt, therapy.getPhysiotherapistId()).getUser().getUsername().equals(user.getUsername())){
             appointment.setDone(appointmentResource.getDone());
             appointment.setTopic(appointmentResource.getTopic());
             appointment.setDiagnosis(appointmentResource.getDiagnosis());

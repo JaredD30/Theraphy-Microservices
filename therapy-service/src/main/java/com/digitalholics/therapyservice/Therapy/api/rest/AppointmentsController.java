@@ -43,7 +43,8 @@ public class AppointmentsController {
     @GetMapping
     public Page<AppointmentResource> getAllAppointments(
             @Parameter(hidden = true) @RequestHeader("Authorization") String jwt, Pageable pageable) {
-        return mapper.modelListPage(appointmentService.getAll(), pageable);
+        //return mapper.modelListPage(appointmentService.getAll(), pageable);
+        return appointmentService.getAllResources(jwt, pageable);
     }
 
     @Operation(summary = "Get appointment by id", description = "Returns appointment with a provided id")

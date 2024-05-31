@@ -7,10 +7,11 @@ import com.digitalholics.therapyservice.Shared.configuration.ExternalConfigurati
 import com.digitalholics.therapyservice.Therapy.domain.model.entity.Appointment;
 import com.digitalholics.therapyservice.Therapy.domain.model.entity.External.User;
 import com.digitalholics.therapyservice.Therapy.domain.model.entity.Therapy;
-import com.digitalholics.therapyservice.Therapy.domain.model.entity.Treatment;
 import com.digitalholics.therapyservice.Therapy.domain.persistence.AppointmentRepository;
 import com.digitalholics.therapyservice.Therapy.domain.persistence.TherapyRepository;
 import com.digitalholics.therapyservice.Therapy.domain.service.AppointmentService;
+import com.digitalholics.therapyservice.Therapy.mapping.AppointmentMapper;
+import com.digitalholics.therapyservice.Therapy.resource.Appointment.AppointmentResource;
 import com.digitalholics.therapyservice.Therapy.resource.Appointment.CreateAppointmentResource;
 import com.digitalholics.therapyservice.Therapy.resource.Appointment.UpdateAppointmentResource;
 import jakarta.validation.ConstraintViolation;
@@ -35,13 +36,15 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final Validator validator;
     private final ExternalConfiguration externalConfiguration;
 
+    private final AppointmentMapper mapper;
 
-    public AppointmentServiceImpl(AppointmentRepository appointmentRepository, TherapyRepository therapyRepository, Validator validator, ExternalConfiguration externalConfiguration) {
+    public AppointmentServiceImpl(AppointmentRepository appointmentRepository, TherapyRepository therapyRepository, Validator validator, ExternalConfiguration externalConfiguration, AppointmentMapper mapper) {
         this.appointmentRepository = appointmentRepository;
         this.therapyRepository = therapyRepository;
 
         this.validator = validator;
         this.externalConfiguration = externalConfiguration;
+        this.mapper = mapper;
     }
 
     @Override
@@ -52,6 +55,17 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public Page<Appointment> getAll(Pageable pageable) {
         return appointmentRepository.findAll(pageable);
+    }
+
+    @Override
+    public Page<AppointmentResource> getAllResources(String jwt, Pageable pageable) {
+        Page<AppointmentResource> appointments =
+                mapper.modelListPage(getAll(), pageable);
+        appointments.forEach(appointment -> {
+            appointment.getTherapy().setPatient(externalConfiguration.getPatientByID(jwt, appointment.getTherapy().getPatient().getId()));
+            appointment.getTherapy().setPhysiotherapist(externalConfiguration.getPhysiotherapistById(jwt, appointment.getTherapy().getPhysiotherapist().getId()));
+        });
+        return appointments;
     }
 
     @Override

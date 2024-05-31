@@ -1,6 +1,7 @@
 package com.digitalholics.therapyservice.Therapy.domain.service;
 
 import com.digitalholics.therapyservice.Therapy.domain.model.entity.Appointment;
+import com.digitalholics.therapyservice.Therapy.resource.Appointment.AppointmentResource;
 import com.digitalholics.therapyservice.Therapy.resource.Appointment.CreateAppointmentResource;
 import com.digitalholics.therapyservice.Therapy.resource.Appointment.UpdateAppointmentResource;
 import org.springframework.data.domain.Page;
@@ -13,6 +14,8 @@ public interface AppointmentService {
 
     List<Appointment> getAll();
     Page<Appointment> getAll(Pageable pageable);
+
+    Page<AppointmentResource> getAllResources(String jwt, Pageable pageable);
 
     Appointment getById(Integer appointmentId);
 

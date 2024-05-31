@@ -59,7 +59,8 @@ public class TreatmentsController {
     public TreatmentResource getTreatmentById(
             @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
             @Parameter(description = "Treatment Id", required = true, examples = @ExampleObject(name = "treatmentId", value = "1")) @PathVariable Integer treatmentId) {
-        return mapper.toResource(treatmentService.getById(treatmentId));
+       // return mapper.toResource(treatmentService.getById(treatmentId));
+        return treatmentService.getResourceById(jwt,treatmentId);
     }
 
     @Operation(summary = "Get treatment's list by therapy id", description = "Returns treatment's list with a provided therapy id")

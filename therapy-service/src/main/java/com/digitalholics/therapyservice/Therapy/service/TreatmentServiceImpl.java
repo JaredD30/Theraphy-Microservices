@@ -76,6 +76,14 @@ public class TreatmentServiceImpl implements TreatmentService {
         return treatmentRepository.findById(treatmentId).orElseThrow(() -> new ResourceNotFoundException(ENTITY, treatmentId));
     }
 
+    @Override
+    public TreatmentResource getResourceById(String jwt, Integer treatmentId) {
+        TreatmentResource treatment = mapper.toResource(getById(treatmentId));
+        treatment.getTherapy().setPatient(externalConfiguration.getPatientByID(jwt, treatment.getTherapy().getPatient().getId()));
+        treatment.getTherapy().setPhysiotherapist(externalConfiguration.getPhysiotherapistById(jwt, treatment.getTherapy().getPhysiotherapist().getId()));
+        return treatment;
+    }
+
 //    @Override
 //    public Treatment create(Treatment treatment) {
 //        Set<ConstraintViolation<Treatment>> violations = validator.validate(treatment);

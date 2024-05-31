@@ -20,6 +20,8 @@ public interface TreatmentService {
 
     Treatment getById(Integer treatmentId);
 
+    TreatmentResource getResourceById(String jwt, Integer treatmentId);
+
     Treatment create(String jwt, CreateTreatmentResource treatmentResource);
 
     List<Treatment> getTreatmentByTherapyId(Integer therapyId);

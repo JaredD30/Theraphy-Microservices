@@ -19,6 +19,8 @@ public interface AppointmentService {
 
     Appointment getById(Integer appointmentId);
 
+    AppointmentResource getResourceById(String jwt, Integer appointmentId);
+
     List<Appointment> getAppointmentByTherapyId(Integer therapyId);
 
     Appointment create(String jwt, CreateAppointmentResource appointment);

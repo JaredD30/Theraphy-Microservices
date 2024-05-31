@@ -59,7 +59,8 @@ public class AppointmentsController {
             @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
             @Parameter(description = "Appointment Id", required = true, examples = @ExampleObject(name = "appointmentId", value = "1")) @PathVariable Integer appointmentId
     ) {
-        return mapper.toResource(appointmentService.getById(appointmentId));
+        //return mapper.toResource(appointmentService.getById(appointmentId));
+        return appointmentService.getResourceById(jwt, appointmentId);
     }
 
     @Operation(summary = "Get appointment's list by therapy id", description = "Returns appointment's list with a provide therapy id")

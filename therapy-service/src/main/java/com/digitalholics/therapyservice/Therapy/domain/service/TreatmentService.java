@@ -30,6 +30,8 @@ public interface TreatmentService {
 
     Treatment getTreatmentByDateAndTherapyId(Integer therapyId, String date);
 
+    TreatmentResource getResourceByDateAndTherapyId(String jwt, Integer therapyId, String date);
+
     Treatment update(Integer treatmentId, UpdateTreatmentResource request);
 
     ResponseEntity<?> delete(Integer treatmentId);

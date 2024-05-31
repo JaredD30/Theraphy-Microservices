@@ -90,7 +90,8 @@ public class TreatmentsController {
             @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
             @Parameter(description = "Date", required = true, examples = @ExampleObject(name = "date", value = "25/10/2022")) @PathVariable String date,
             @Parameter(description = "Therapy Id", required = true, examples = @ExampleObject(name = "therapyId", value = "1")) @PathVariable Integer therapyId) {
-        return mapper.toResource(treatmentService.getTreatmentByDateAndTherapyId(therapyId, date));
+      //  return mapper.toResource(treatmentService.getTreatmentByDateAndTherapyId(therapyId, date));
+        return treatmentService.getResourceByDateAndTherapyId(jwt,therapyId,date);
     }
 
     @Operation(summary = "Create treatment", description = "Register a treatment")

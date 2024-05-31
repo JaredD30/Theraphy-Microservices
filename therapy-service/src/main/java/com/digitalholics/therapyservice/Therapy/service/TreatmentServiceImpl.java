@@ -148,6 +148,14 @@ public class TreatmentServiceImpl implements TreatmentService {
         return treatmentRepository.findTreatmentByDateAndTherapyId(therapyId, date);
     }
 
+
+    @Override
+    public TreatmentResource getResourceByDateAndTherapyId(String jwt, Integer therapyId, String date) {
+        TreatmentResource treatment = mapper.toResource(getTreatmentByDateAndTherapyId(therapyId, date));
+        treatment.getTherapy().setPatient(externalConfiguration.getPatientByID(jwt, treatment.getTherapy().getPatient().getId()));
+        treatment.getTherapy().setPhysiotherapist(externalConfiguration.getPhysiotherapistById(jwt, treatment.getTherapy().getPhysiotherapist().getId()));
+        return treatment;
+    }
     @Override
     public Treatment update(Integer treatmentId, UpdateTreatmentResource request) {
         Treatment treatment = getById(treatmentId);

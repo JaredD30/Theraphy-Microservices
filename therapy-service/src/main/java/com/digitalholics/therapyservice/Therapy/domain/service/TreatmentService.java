@@ -2,6 +2,7 @@ package com.digitalholics.therapyservice.Therapy.domain.service;
 
 import com.digitalholics.therapyservice.Therapy.domain.model.entity.Treatment;
 import com.digitalholics.therapyservice.Therapy.resource.Treatment.CreateTreatmentResource;
+import com.digitalholics.therapyservice.Therapy.resource.Treatment.TreatmentResource;
 import com.digitalholics.therapyservice.Therapy.resource.Treatment.UpdateTreatmentResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +15,8 @@ public interface TreatmentService {
     List<Treatment> getAll();
 
     Page<Treatment> getAll(Pageable pageable);
+
+    Page<TreatmentResource> getAllResources(String jwt, Pageable pageable);
 
     Treatment getById(Integer treatmentId);
 

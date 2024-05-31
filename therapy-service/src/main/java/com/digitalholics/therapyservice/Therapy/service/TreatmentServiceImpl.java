@@ -10,7 +10,9 @@ import com.digitalholics.therapyservice.Therapy.domain.model.entity.Treatment;
 import com.digitalholics.therapyservice.Therapy.domain.persistence.TherapyRepository;
 import com.digitalholics.therapyservice.Therapy.domain.persistence.TreatmentRepository;
 import com.digitalholics.therapyservice.Therapy.domain.service.TreatmentService;
+import com.digitalholics.therapyservice.Therapy.mapping.TreatmentMapper;
 import com.digitalholics.therapyservice.Therapy.resource.Treatment.CreateTreatmentResource;
+import com.digitalholics.therapyservice.Therapy.resource.Treatment.TreatmentResource;
 import com.digitalholics.therapyservice.Therapy.resource.Treatment.UpdateTreatmentResource;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
@@ -37,12 +39,15 @@ public class TreatmentServiceImpl implements TreatmentService {
 
     private final ExternalConfiguration externalConfiguration;
 
+    private final TreatmentMapper mapper;
 
-    public TreatmentServiceImpl(TreatmentRepository treatmentRepository, TherapyRepository therapyRepository, Validator validator, ExternalConfiguration externalConfiguration) {
+
+    public TreatmentServiceImpl(TreatmentRepository treatmentRepository, TherapyRepository therapyRepository, Validator validator, ExternalConfiguration externalConfiguration, TreatmentMapper mapper) {
         this.treatmentRepository = treatmentRepository;
         this.therapyRepository = therapyRepository;
         this.validator = validator;
         this.externalConfiguration = externalConfiguration;
+        this.mapper = mapper;
     }
 
     @Override
@@ -53,6 +58,17 @@ public class TreatmentServiceImpl implements TreatmentService {
     @Override
     public Page<Treatment> getAll(Pageable pageable) {
         return treatmentRepository.findAll(pageable);
+    }
+
+    @Override
+    public Page<TreatmentResource> getAllResources(String jwt, Pageable pageable) {
+        Page<TreatmentResource> treatments =
+                mapper.modelListPage(getAll(), pageable);
+        treatments.forEach(treatment -> {
+            treatment.getTherapy().setPatient(externalConfiguration.getPatientByID(jwt, treatment.getTherapy().getPatient().getId()));
+            treatment.getTherapy().setPhysiotherapist(externalConfiguration.getPhysiotherapistById(jwt, treatment.getTherapy().getPhysiotherapist().getId()));
+        });
+        return treatments;
     }
 
     @Override

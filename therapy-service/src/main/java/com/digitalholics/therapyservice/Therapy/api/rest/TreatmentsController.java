@@ -44,7 +44,8 @@ public class TreatmentsController {
     @GetMapping
     public Page<TreatmentResource> getAllTreatments(
             @Parameter(hidden = true) @RequestHeader("Authorization") String jwt, Pageable pageable) {
-        return mapper.modelListPage(treatmentService.getAll(), pageable);
+        //return mapper.modelListPage(treatmentService.getAll(), pageable);
+        return treatmentService.getAllResources(jwt,pageable);
     }
 
     @Operation(summary = "Get treatment by id", description = "Returns treatment with a provided id")
@@ -100,6 +101,9 @@ public class TreatmentsController {
     @PostMapping
     public ResponseEntity<TreatmentResource> createTreatment(
             @Parameter(hidden = true) @RequestHeader("Authorization") String jwt, @RequestBody CreateTreatmentResource resource) {
+        if (jwt != null && jwt.startsWith("Bearer ")) {
+            jwt = jwt.substring(7); // Quita "Bearer " del token
+        }
         return new ResponseEntity<>(mapper.toResource(treatmentService.create(jwt, resource)), HttpStatus.CREATED);
     }
 

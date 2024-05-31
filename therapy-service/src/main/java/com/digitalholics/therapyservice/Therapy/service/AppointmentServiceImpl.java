@@ -87,6 +87,17 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
+    public Page<AppointmentResource> getResourcesByTherapyId(String jwt, Pageable pageable, Integer theraphyId) {
+        Page<AppointmentResource> appointments =
+                mapper.modelListPage(getAppointmentByTherapyId(theraphyId), pageable);
+        appointments.forEach(appointment -> {
+            appointment.getTherapy().setPatient(externalConfiguration.getPatientByID(jwt, appointment.getTherapy().getPatient().getId()));
+            appointment.getTherapy().setPhysiotherapist(externalConfiguration.getPhysiotherapistById(jwt, appointment.getTherapy().getPhysiotherapist().getId()));
+        });
+        return appointments;
+    }
+
+    @Override
     public Appointment create(String jwt, CreateAppointmentResource appointmentResource) {
         Set<ConstraintViolation<CreateAppointmentResource>> violations = validator.validate(appointmentResource);
 

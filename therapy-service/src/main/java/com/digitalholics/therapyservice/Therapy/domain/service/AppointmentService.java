@@ -23,6 +23,8 @@ public interface AppointmentService {
 
     List<Appointment> getAppointmentByTherapyId(Integer therapyId);
 
+    Page<AppointmentResource> getResourcesByTherapyId(String jwt, Pageable pageable, Integer theraphyId);
+
     Appointment create(String jwt, CreateAppointmentResource appointment);
 
     Appointment update(Integer appointmentId, UpdateAppointmentResource request);

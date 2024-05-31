@@ -73,7 +73,8 @@ public class AppointmentsController {
     @GetMapping("byTherapyId/{therapyId}")
     public Page<AppointmentResource> getAppointmentByTherapyId(
             @Parameter(hidden = true) @RequestHeader("Authorization") String jwt, @Parameter(description = "therapy's id", required = true, examples = @ExampleObject(name = "TherapyId", value = "1")) @PathVariable Integer therapyId, Pageable pageable) {
-        return mapper.modelListPage(appointmentService.getAppointmentByTherapyId(therapyId), pageable);
+       // return mapper.modelListPage(appointmentService.getAppointmentByTherapyId(therapyId), pageable);
+        return appointmentService.getResourcesByTherapyId(jwt, pageable, therapyId);
     }
 
     @Operation(summary = "Get appointment's list by therapy by patient id", description = "Returns appointment's list with a provided therapy by patient id")

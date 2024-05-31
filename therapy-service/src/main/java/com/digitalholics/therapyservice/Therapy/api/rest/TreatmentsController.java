@@ -74,7 +74,8 @@ public class TreatmentsController {
     public Page<TreatmentResource> getTreatmentByTherapyId(
             @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
             @Parameter(description = "Therapy Id", required = true, examples = @ExampleObject(name = "therapyId", value = "1")) @PathVariable Integer therapyId, Pageable pageable){
-        return mapper.modelListPage(treatmentService.getTreatmentByTherapyId(therapyId), pageable);
+        //return mapper.modelListPage(treatmentService.getTreatmentByTherapyId(therapyId), pageable);
+        return treatmentService.getResourcesByTherapyId(jwt,pageable,therapyId);
     }
 
     @Operation(summary = "Get treatment by therapy id and by Date", description = "Returns a treatment with a provided therapy id and date")

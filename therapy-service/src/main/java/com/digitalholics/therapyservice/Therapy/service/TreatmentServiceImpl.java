@@ -132,6 +132,18 @@ public class TreatmentServiceImpl implements TreatmentService {
     }
 
     @Override
+    public Page<TreatmentResource> getResourcesByTherapyId(String jwt, Pageable pageable, Integer theraphyId) {
+        Page<TreatmentResource> treatments =
+                mapper.modelListPage(getTreatmentByTherapyId(theraphyId), pageable);
+        treatments.forEach(treatment -> {
+            treatment.getTherapy().setPatient(externalConfiguration.getPatientByID(jwt, treatment.getTherapy().getPatient().getId()));
+            treatment.getTherapy().setPhysiotherapist(externalConfiguration.getPhysiotherapistById(jwt, treatment.getTherapy().getPhysiotherapist().getId()));
+        });
+        return treatments;
+    }
+
+
+    @Override
     public Treatment getTreatmentByDateAndTherapyId(Integer therapyId, String date) {
         return treatmentRepository.findTreatmentByDateAndTherapyId(therapyId, date);
     }

@@ -26,6 +26,8 @@ public interface TreatmentService {
 
     List<Treatment> getTreatmentByTherapyId(Integer therapyId);
 
+    Page<TreatmentResource> getResourcesByTherapyId(String jwt, Pageable pageable, Integer theraphyId);
+
     Treatment getTreatmentByDateAndTherapyId(Integer therapyId, String date);
 
     Treatment update(Integer treatmentId, UpdateTreatmentResource request);

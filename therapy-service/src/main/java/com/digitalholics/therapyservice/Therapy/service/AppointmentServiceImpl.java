@@ -10,6 +10,8 @@ import com.digitalholics.therapyservice.Therapy.domain.model.entity.Therapy;
 import com.digitalholics.therapyservice.Therapy.domain.persistence.AppointmentRepository;
 import com.digitalholics.therapyservice.Therapy.domain.persistence.TherapyRepository;
 import com.digitalholics.therapyservice.Therapy.domain.service.AppointmentService;
+import com.digitalholics.therapyservice.Therapy.mapping.AppointmentMapper;
+import com.digitalholics.therapyservice.Therapy.resource.Appointment.AppointmentResource;
 import com.digitalholics.therapyservice.Therapy.resource.Appointment.CreateAppointmentResource;
 import com.digitalholics.therapyservice.Therapy.resource.Appointment.UpdateAppointmentResource;
 import jakarta.validation.ConstraintViolation;
@@ -34,13 +36,15 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final Validator validator;
     private final ExternalConfiguration externalConfiguration;
 
+    private final AppointmentMapper mapper;
 
-    public AppointmentServiceImpl(AppointmentRepository appointmentRepository, TherapyRepository therapyRepository, Validator validator, ExternalConfiguration externalConfiguration) {
+    public AppointmentServiceImpl(AppointmentRepository appointmentRepository, TherapyRepository therapyRepository, Validator validator, ExternalConfiguration externalConfiguration, AppointmentMapper mapper) {
         this.appointmentRepository = appointmentRepository;
         this.therapyRepository = therapyRepository;
 
         this.validator = validator;
         this.externalConfiguration = externalConfiguration;
+        this.mapper = mapper;
     }
 
     @Override
@@ -54,13 +58,43 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
+    public Page<AppointmentResource> getAllResources(String jwt, Pageable pageable) {
+        Page<AppointmentResource> appointments =
+                mapper.modelListPage(getAll(), pageable);
+        appointments.forEach(appointment -> {
+            appointment.getTherapy().setPatient(externalConfiguration.getPatientByID(jwt, appointment.getTherapy().getPatient().getId()));
+            appointment.getTherapy().setPhysiotherapist(externalConfiguration.getPhysiotherapistById(jwt, appointment.getTherapy().getPhysiotherapist().getId()));
+        });
+        return appointments;
+    }
+
+    @Override
     public Appointment getById(Integer appointmentId) {
         return appointmentRepository.findById(appointmentId).orElseThrow(() -> new ResourceNotFoundException(ENTITY, appointmentId));
     }
 
     @Override
+    public AppointmentResource getResourceById(String jwt, Integer appointmentId) {
+        AppointmentResource appointment = mapper.toResource(getById(appointmentId));
+        appointment.getTherapy().setPatient(externalConfiguration.getPatientByID(jwt, appointment.getTherapy().getPatient().getId()));
+        appointment.getTherapy().setPhysiotherapist(externalConfiguration.getPhysiotherapistById(jwt, appointment.getTherapy().getPhysiotherapist().getId()));
+        return appointment;
+    }
+
+    @Override
     public List<Appointment> getAppointmentByTherapyId(Integer therapyId) {
         return appointmentRepository.findAppointmentByTherapyId(therapyId);
+    }
+
+    @Override
+    public Page<AppointmentResource> getResourcesByTherapyId(String jwt, Pageable pageable, Integer theraphyId) {
+        Page<AppointmentResource> appointments =
+                mapper.modelListPage(getAppointmentByTherapyId(theraphyId), pageable);
+        appointments.forEach(appointment -> {
+            appointment.getTherapy().setPatient(externalConfiguration.getPatientByID(jwt, appointment.getTherapy().getPatient().getId()));
+            appointment.getTherapy().setPhysiotherapist(externalConfiguration.getPhysiotherapistById(jwt, appointment.getTherapy().getPhysiotherapist().getId()));
+        });
+        return appointments;
     }
 
     @Override
@@ -72,18 +106,13 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         User user = externalConfiguration.getUser(jwt);
 
-        Appointment appointmentWithTopic = appointmentRepository.findByTopic(appointmentResource.getTopic());
-
-        if(appointmentWithTopic != null)
-            throw new ResourceValidationException(ENTITY,
-                    "A Appointment with the same topic already exists.");
-
         Optional<Therapy> therapyOptional = therapyRepository.findById(appointmentResource.getTherapyId());
 
-        Therapy therapy = therapyOptional.orElseThrow(()-> new NotFoundException("This therapy not found with ID: "+ appointmentResource.getTherapyId()));
+        Therapy therapy = therapyOptional.orElseThrow(() -> new NotFoundException("Therapy not found with ID: " + appointmentResource.getTherapyId()));
+
         Appointment appointment = new Appointment();
 
-        if (externalConfiguration.getPatientByID(jwt, therapy.getPatientId()).getUser().getUsername().equals(user.getUsername()) || externalConfiguration.getPhysiotherapistById(jwt, therapy.getPhysiotherapistId()).getUser().getUsername().equals(user.getUsername())){
+        if (externalConfiguration.getPhysiotherapistById(jwt, therapy.getPhysiotherapistId()).getUser().getUsername().equals(user.getUsername())){
             appointment.setDone(appointmentResource.getDone());
             appointment.setTopic(appointmentResource.getTopic());
             appointment.setDiagnosis(appointmentResource.getDiagnosis());
@@ -139,13 +168,44 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
+    public Page<AppointmentResource> getResourcesByPatientId(String jwt, Pageable pageable, Integer patientId) {
+        Page<AppointmentResource> appointments =
+                mapper.modelListPage(getAppointmentsByTherapyByPatientId(patientId), pageable);
+        appointments.forEach(appointment -> {
+            appointment.getTherapy().setPatient(externalConfiguration.getPatientByID(jwt, appointment.getTherapy().getPatient().getId()));
+            appointment.getTherapy().setPhysiotherapist(externalConfiguration.getPhysiotherapistById(jwt, appointment.getTherapy().getPhysiotherapist().getId()));
+        });
+        return appointments;
+    }
+
+
+    @Override
     public List<Appointment> getAppointmentsByTherapyByPhysiotherapistId(Integer physiotherapistId) {
         return appointmentRepository.findAppointmentsByTherapyByPhysiotherapistId(physiotherapistId);
     }
 
     @Override
+    public Page<AppointmentResource> getResourcesByPhysiotherapistId(String jwt, Pageable pageable, Integer physiotherapistId) {
+        Page<AppointmentResource> appointments =
+                mapper.modelListPage(getAppointmentsByTherapyByPhysiotherapistId(physiotherapistId), pageable);
+        appointments.forEach(appointment -> {
+            appointment.getTherapy().setPatient(externalConfiguration.getPatientByID(jwt, appointment.getTherapy().getPatient().getId()));
+            appointment.getTherapy().setPhysiotherapist(externalConfiguration.getPhysiotherapistById(jwt, appointment.getTherapy().getPhysiotherapist().getId()));
+        });
+        return appointments;
+    }
+
+    @Override
     public Appointment getAppointmentByDateAndTherapyId(Integer therapyId, String date) {
         return appointmentRepository.findAppointmentByDateAndTherapyId(therapyId, date);
+    }
+
+    @Override
+    public AppointmentResource getResourceByDateAndTherapyId(String jwt, Integer therapyId, String date) {
+        AppointmentResource  appointment = mapper.toResource(getAppointmentByDateAndTherapyId(therapyId, date));
+        appointment.getTherapy().setPatient(externalConfiguration.getPatientByID(jwt, appointment.getTherapy().getPatient().getId()));
+        appointment.getTherapy().setPhysiotherapist(externalConfiguration.getPhysiotherapistById(jwt, appointment.getTherapy().getPhysiotherapist().getId()));
+        return appointment;
     }
 
 //    @Override

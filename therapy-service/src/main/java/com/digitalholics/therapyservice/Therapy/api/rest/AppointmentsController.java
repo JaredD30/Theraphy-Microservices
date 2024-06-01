@@ -43,7 +43,8 @@ public class AppointmentsController {
     @GetMapping
     public Page<AppointmentResource> getAllAppointments(
             @Parameter(hidden = true) @RequestHeader("Authorization") String jwt, Pageable pageable) {
-        return mapper.modelListPage(appointmentService.getAll(), pageable);
+        //return mapper.modelListPage(appointmentService.getAll(), pageable);
+        return appointmentService.getAllResources(jwt, pageable);
     }
 
     @Operation(summary = "Get appointment by id", description = "Returns appointment with a provided id")
@@ -58,7 +59,8 @@ public class AppointmentsController {
             @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
             @Parameter(description = "Appointment Id", required = true, examples = @ExampleObject(name = "appointmentId", value = "1")) @PathVariable Integer appointmentId
     ) {
-        return mapper.toResource(appointmentService.getById(appointmentId));
+        //return mapper.toResource(appointmentService.getById(appointmentId));
+        return appointmentService.getResourceById(jwt, appointmentId);
     }
 
     @Operation(summary = "Get appointment's list by therapy id", description = "Returns appointment's list with a provide therapy id")
@@ -71,7 +73,8 @@ public class AppointmentsController {
     @GetMapping("byTherapyId/{therapyId}")
     public Page<AppointmentResource> getAppointmentByTherapyId(
             @Parameter(hidden = true) @RequestHeader("Authorization") String jwt, @Parameter(description = "therapy's id", required = true, examples = @ExampleObject(name = "TherapyId", value = "1")) @PathVariable Integer therapyId, Pageable pageable) {
-        return mapper.modelListPage(appointmentService.getAppointmentByTherapyId(therapyId), pageable);
+       // return mapper.modelListPage(appointmentService.getAppointmentByTherapyId(therapyId), pageable);
+        return appointmentService.getResourcesByTherapyId(jwt, pageable, therapyId);
     }
 
     @Operation(summary = "Get appointment's list by therapy by patient id", description = "Returns appointment's list with a provided therapy by patient id")
@@ -84,7 +87,8 @@ public class AppointmentsController {
     @GetMapping("appointment/therapy-patient/{patientId}")
     public Page<AppointmentResource> getAppointmentsByTherapyByPatientId(
             @Parameter(hidden = true) @RequestHeader("Authorization") String jwt, @Parameter(description = "patient's id", required = true, examples = @ExampleObject(name = "patientId", value = "1")) @PathVariable Integer patientId, Pageable pageable) {
-        return mapper.modelListPage(appointmentService.getAppointmentsByTherapyByPatientId(patientId),pageable);
+        //return mapper.modelListPage(appointmentService.getAppointmentsByTherapyByPatientId(patientId),pageable);
+        return appointmentService.getResourcesByPatientId(jwt, pageable, patientId);
     }
 
     @Operation(summary = "Get appointment's list by therapy by physiotherapist id", description = "Returns appointment's list with a provide therapy by physiohterapist id")
@@ -97,7 +101,8 @@ public class AppointmentsController {
     @GetMapping("appointment/therapy-physiotherapist/{physiotherapistId}")
     public Page<AppointmentResource> getAppointmentsByTherapyByPhysiotherapistId(
             @Parameter(hidden = true) @RequestHeader("Authorization") String jwt, @Parameter(description = "physiotherapist's id", required = true, examples = @ExampleObject(name = "physiotherapistId", value = "1")) @PathVariable Integer physiotherapistId, Pageable pageable) {
-        return mapper.modelListPage(appointmentService.getAppointmentsByTherapyByPhysiotherapistId(physiotherapistId), pageable);
+        //return mapper.modelListPage(appointmentService.getAppointmentsByTherapyByPhysiotherapistId(physiotherapistId), pageable);
+        return  appointmentService.getResourcesByPhysiotherapistId(jwt, pageable, physiotherapistId);
     }
 
     @Operation(summary = "Get appointment by date and therapy id", description = "Returns appointment with a provide therapy id")
@@ -110,7 +115,8 @@ public class AppointmentsController {
     @GetMapping("byDate/{date}/TherapyId/{therapyId}")
     public AppointmentResource getAppointmentByDateAndTherapyId(
             @Parameter(hidden = true) @RequestHeader("Authorization") String jwt, @Parameter(description = "date", required = true, examples = @ExampleObject(name = "date", value = "1")) @PathVariable String date, @Parameter(description = "physiotherapist's id", required = true, examples = @ExampleObject(name = "physiotherapistId", value = "1")) @PathVariable Integer therapyId) {
-        return mapper.toResource(appointmentService.getAppointmentByDateAndTherapyId(therapyId, date));
+        //return mapper.toResource(appointmentService.getAppointmentByDateAndTherapyId(therapyId, date));
+        return appointmentService.getResourceByDateAndTherapyId(jwt, therapyId, date);
     }
 
     @Operation(summary = "Create appointment", description = "Register an appointment")
@@ -123,6 +129,9 @@ public class AppointmentsController {
     @PostMapping
     public ResponseEntity<AppointmentResource> createAppointment(
             @Parameter(hidden = true) @RequestHeader("Authorization") String jwt, @RequestBody CreateAppointmentResource resource) {
+        if (jwt != null && jwt.startsWith("Bearer ")) {
+            jwt = jwt.substring(7); // Quita "Bearer " del token
+        }
         return new ResponseEntity<>(mapper.toResource(appointmentService.create(jwt,(resource))), HttpStatus.CREATED);
     }
 

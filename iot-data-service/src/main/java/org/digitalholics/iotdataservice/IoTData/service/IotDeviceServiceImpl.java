@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -41,41 +42,23 @@ public class IotDeviceServiceImpl implements IotDeviceService {
     }
 
     @Override
-    public List<IotDevice> getByTherapyIdAndDate(Integer therapyId, String date) {
-
-
-        return iotDeviceRepository.findIotResultsByTherapyByDate(therapyId,date);
-
-    }
-
-
-
-    @Override
     public IotDevice getById(Integer iotDeviceId) {
         return iotDeviceRepository.findById(iotDeviceId)
                 .orElseThrow(() -> new ResourceNotFoundException(ENTITY, iotDeviceId));
     }
 
     @Override
-    public IotDevice getByTemperature(String temperature) {
-        return iotDeviceRepository.findByTemperature(temperature);
+    public List<IotDevice> getByTherapyId(Integer therapyId) {
+        return iotDeviceRepository.findByTherapyId(therapyId);
     }
 
     @Override
-    public IotDevice create(CreateIotDeviceResource createIotDeviceResource) {
-        Set<ConstraintViolation<CreateIotDeviceResource>>
-                violations = validator.validate(createIotDeviceResource);
-
-        if (!violations.isEmpty())
-            throw new ResourceValidationException(ENTITY, violations);
-
+    public IotDevice create( ) {
         IotDevice iotDevice = new IotDevice();
-        iotDevice.setTemperature(createIotDeviceResource.getTemperature());
-        iotDevice.setDistance(createIotDeviceResource.getDistance());
-        iotDevice.setPulse(createIotDeviceResource.getPulse());
-        iotDevice.setHumidity(createIotDeviceResource.getHumidity());
-        iotDevice.setTherapyId(createIotDeviceResource.getTherapyId());
-        //iotDevice.setDate(createIotDeviceResource.getDate());
+
+        iotDevice.setTherapyId(0);
+        iotDevice.setAssignmentDate("New");
+        iotDevice.setTherapyQuantity(0);
         return iotDeviceRepository.save(iotDevice);
     }
 
@@ -83,13 +66,12 @@ public class IotDeviceServiceImpl implements IotDeviceService {
     public IotDevice update(Integer iotDeviceId, UpdateIotDeviceResource request) {
         IotDevice iotDevice = getById(iotDeviceId);
 
-        iotDevice.setTemperature(request.getTemperature() != null ? request.getTemperature() : iotDevice.getTemperature());
-        iotDevice.setDistance(request.getDistance() != null ? request.getDistance() : iotDevice.getDistance());
-        iotDevice.setPulse(request.getPulse() != null ? request.getPulse() : iotDevice.getPulse());
-        iotDevice.setHumidity(request.getHumidity() != null ? request.getHumidity() : iotDevice.getHumidity());
-        iotDevice.setTherapyId(request.getTherapyId() != null ? request.getTherapyId() : iotDevice.getId());
-        iotDevice.setDate(request.getDate() != null ? request.getDate() : iotDevice.getDate());
-
+        if (request.getAssignmentDate() != null) {
+            iotDevice.setAssignmentDate(request.getAssignmentDate());
+        }
+        if (request.getTherapyQuantity() != null) {
+            iotDevice.setTherapyQuantity(request.getTherapyQuantity());
+        }
 
         return iotDeviceRepository.save(iotDevice);
     }
@@ -101,4 +83,25 @@ public class IotDeviceServiceImpl implements IotDeviceService {
             return ResponseEntity.ok().build();
         }).orElseThrow(()-> new ResourceNotFoundException(ENTITY,iotDeviceId));
     }
+
+        @Override
+        public IotDevice assignTherapy(Integer iotDeviceId, Integer therapyId) {
+            IotDevice iotDevice = getById(iotDeviceId);
+
+            iotDevice.setTherapyId(therapyId);
+            String currentDate = LocalDate.now().toString();
+            iotDevice.setAssignmentDate(currentDate);
+
+            Integer beforeTherapyQuantity = iotDevice.getTherapyQuantity();
+
+            if (beforeTherapyQuantity +1 >5){
+                throw new RuntimeException("El dispositivo ha llegado a su límite de asignaciones de terapia.");
+            }else{
+                iotDevice.setTherapyQuantity(beforeTherapyQuantity+1);
+
+                return iotDeviceRepository.save(iotDevice);
+            }
+        }
+
+
 }

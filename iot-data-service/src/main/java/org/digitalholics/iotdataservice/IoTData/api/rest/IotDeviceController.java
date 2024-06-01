@@ -31,24 +31,17 @@ public class IotDeviceController {
         return mapper.modelListPage(iotDeviceService.getAll(), pageable);
     }
 
-    @GetMapping("byTherapyId/{therapyId}/Date/{date}")
-    public Page<IotDeviceResource> getByTherapyIdAndDate(@PathVariable Integer therapyId,@PathVariable String date, Pageable pageable) {
-        return mapper.modelListPage(iotDeviceService.getByTherapyIdAndDate(therapyId, date), pageable);
-    }
+
 
     @GetMapping("{iotDeviceId}")
     public IotDeviceResource getIoTDeviceById(@PathVariable Integer iotDeviceId) {
         return mapper.toResource(iotDeviceService.getById(iotDeviceId));
     }
 
-    @GetMapping("iotDevice/{temperature}")
-    public IotDeviceResource getIoTDeviceByPatientId(@PathVariable String temperature) {
-        return mapper.toResource(iotDeviceService.getByTemperature(temperature));
-    }
 
     @PostMapping
-    public ResponseEntity<IotDeviceResource> createIoTDevice(@RequestBody CreateIotDeviceResource resource) {
-        return new ResponseEntity<>(mapper.toResource(iotDeviceService.create(resource)), HttpStatus.CREATED);
+    public ResponseEntity<IotDeviceResource> createIoTDevice() {
+        return new ResponseEntity<>(mapper.toResource(iotDeviceService.create()), HttpStatus.CREATED);
     }
 
     @DeleteMapping("{iotDeviceId}")

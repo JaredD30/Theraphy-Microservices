@@ -7,17 +7,17 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="social-service" />
-        <module name="iot-data-service" />
-        <module name="profile-service" />
-        <module name="eureka-server" />
-        <module name="consultations-service" />
-        <module name="echo-service" />
         <module name="config-server" />
         <module name="payment-service" />
         <module name="security-service" />
+        <module name="social-service" />
         <module name="api-gateway" />
+        <module name="iot-data-service" />
+        <module name="profile-service" />
         <module name="therapy-service" />
+        <module name="eureka-server" />
+        <module name="consultations-service" />
+        <module name="echo-service" />
         <module name="health-expertise-service" />
       </profile>
     </annotationProcessing>

@@ -1,6 +1,7 @@
 package org.digitalholics.iotdataservice.IoTData.resource;
 
 import lombok.*;
+import org.digitalholics.iotdataservice.IoTData.domain.model.entity.External.Therapy;
 
 @Getter
 @Setter
@@ -9,10 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 public class IotDeviceResource {
     private Integer id;
-    private String temperature;
-    private String distance;
-    private String pulse;
-    private String humidity;
-    private Integer therapyId;
-    private String date;
+    private Therapy therapy;
+    private String assignmentDate;
+    private Integer therapyQuantity;
 }

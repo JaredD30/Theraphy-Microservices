@@ -13,7 +13,5 @@ public interface IotDeviceRepository extends JpaRepository<IotDevice, Integer> {
 
     List<IotDevice>  findByTherapyId(Integer therapyId);
 
-    @Query("select a from IotDevice  a where a.therapyId= :therapyId and a.date= :date")
-    List<IotDevice> findIotResultsByTherapyByDate(Integer therapyId, String date);
 
 }

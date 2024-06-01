@@ -37,7 +37,7 @@
       <module name="echo-service" options="-parameters" />
       <module name="eureka-server" options="-parameters" />
       <module name="health-expertise-service" options="-parameters" />
-      <module name="iot-data-service" options="" />
+      <module name="iot-data-service" options="-parameters" />
       <module name="iot-data-sw" options="" />
       <module name="payment-service" options="-parameters" />
       <module name="profile-service" options="-parameters" />

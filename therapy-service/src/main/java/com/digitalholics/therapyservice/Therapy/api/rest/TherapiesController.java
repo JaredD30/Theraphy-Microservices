@@ -146,5 +146,12 @@ public class TherapiesController {
         return therapyService.delete(therapyId);
     }
 
+    @GetMapping("byPhysioAndPatient/{physiotherapistId}/{patientId}")
+    public TherapyResource getTherapyByPhysiotherapistIdAndPatientId(
+            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
+            @PathVariable Integer patientId, @PathVariable Integer physiotherapistId){
+        //return mapper.toResource((therapyService.getTherapyByPhysiotherapistIdAndPatientId(physiotherapistId, patientId)));
+        return therapyService.getResourceByPhysiotherapistIdAndPatientId(jwt,physiotherapistId,patientId);
+    }
 
 }

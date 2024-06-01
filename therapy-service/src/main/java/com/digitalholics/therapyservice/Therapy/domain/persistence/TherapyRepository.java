@@ -15,4 +15,6 @@ public interface TherapyRepository extends JpaRepository<Therapy, Integer> {
     @Query("select a from Therapy  a where a.patientId = :patientId and a.finished = false")
     Therapy findActiveTherapyByPatientId(Integer patientId);
 
+    @Query("select a from Therapy a where  a.patientId = :patientId and a.physiotherapistId = :physiotherapistId and a.finished = false")
+    Therapy findTherapyByPhysiotherapistIdAndPatientId(Integer physiotherapistId, Integer patientId);
 }

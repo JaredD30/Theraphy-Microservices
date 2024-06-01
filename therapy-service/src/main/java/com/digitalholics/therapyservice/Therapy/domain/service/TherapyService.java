@@ -34,4 +34,7 @@ public interface TherapyService {
 
     ResponseEntity<?> delete(Integer therapyId);
 
+    Therapy getTherapyByPhysiotherapistIdAndPatientId(Integer physiotherapistId, Integer patientId);
+
+    TherapyResource getResourceByPhysiotherapistIdAndPatientId(String jwt, Integer physiotherapistId, Integer patientId);
 }

@@ -196,4 +196,18 @@ public class TherapyServiceImpl implements TherapyService {
                     return ResponseEntity.ok().build();
                 }).orElseThrow(()-> new ResourceNotFoundException(ENTITY, therapyId));
     }
+
+    @Override
+    public Therapy getTherapyByPhysiotherapistIdAndPatientId(Integer physiotherapistId, Integer patientId) {
+        return therapyRepository.findTherapyByPhysiotherapistIdAndPatientId(physiotherapistId, patientId);
+    }
+
+    @Override
+    public TherapyResource getResourceByPhysiotherapistIdAndPatientId(String jwt, Integer physiotherapistId, Integer patientId) {
+        TherapyResource therapy = mapper.toResource(getTherapyByPhysiotherapistIdAndPatientId(physiotherapistId, patientId));
+        therapy.setPatient(externalConfiguration.getPatientByID(jwt, therapy.getPatient().getId()));
+        therapy.setPhysiotherapist(externalConfiguration.getPhysiotherapistById(jwt, therapy.getPhysiotherapist().getId()));
+        return therapy;
+    }
+
 }

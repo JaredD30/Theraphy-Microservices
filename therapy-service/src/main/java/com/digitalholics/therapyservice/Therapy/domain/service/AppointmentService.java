@@ -42,6 +42,8 @@ public interface AppointmentService {
 
     Appointment getAppointmentByDateAndTherapyId(Integer therapyId, String date);
 
+    AppointmentResource getResourceByDateAndTherapyId(String jwt, Integer therapyId, String date);
+
     //Appointment updateDiagnosis(Integer appointmentId, String diagnosis);
 
 }

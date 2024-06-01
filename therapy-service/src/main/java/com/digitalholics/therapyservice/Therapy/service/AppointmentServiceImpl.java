@@ -200,6 +200,14 @@ public class AppointmentServiceImpl implements AppointmentService {
         return appointmentRepository.findAppointmentByDateAndTherapyId(therapyId, date);
     }
 
+    @Override
+    public AppointmentResource getResourceByDateAndTherapyId(String jwt, Integer therapyId, String date) {
+        AppointmentResource  appointment = mapper.toResource(getAppointmentByDateAndTherapyId(therapyId, date));
+        appointment.getTherapy().setPatient(externalConfiguration.getPatientByID(jwt, appointment.getTherapy().getPatient().getId()));
+        appointment.getTherapy().setPhysiotherapist(externalConfiguration.getPhysiotherapistById(jwt, appointment.getTherapy().getPhysiotherapist().getId()));
+        return appointment;
+    }
+
 //    @Override
 //    public Appointment updateDiagnosis(Integer appointmentId, String diagnosis) {
 //        Appointment appointment = getById(appointmentId);

@@ -33,7 +33,12 @@ public interface AppointmentService {
 
 
     List<Appointment> getAppointmentsByTherapyByPatientId(Integer patientId);
+
+    Page<AppointmentResource> getResourcesByPatientId(String jwt, Pageable pageable, Integer patientId);
+
     List<Appointment> getAppointmentsByTherapyByPhysiotherapistId(Integer physiotherapistId);
+
+    Page<AppointmentResource> getResourcesByPhysiotherapistId(String jwt, Pageable pageable, Integer physiotherapistId);
 
     Appointment getAppointmentByDateAndTherapyId(Integer therapyId, String date);
 

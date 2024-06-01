@@ -1,5 +1,7 @@
 package com.digitalholics.consultationsservice.Consultation.resource;
 
+import com.digitalholics.consultationsservice.Consultation.domain.model.entity.External.Patient;
+import com.digitalholics.consultationsservice.Consultation.domain.model.entity.External.Physiotherapist;
 import lombok.*;
 
 @Getter
@@ -16,6 +18,6 @@ public class ConsultationResource {
     private String date;
     private String hour;
     private String place;
-    private Integer physiotherapistId;
-    private Integer patientId;
+    private Physiotherapist physiotherapistId;
+    private Patient patientId;
 }

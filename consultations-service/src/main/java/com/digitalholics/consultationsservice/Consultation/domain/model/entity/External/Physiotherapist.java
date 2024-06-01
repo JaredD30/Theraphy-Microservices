@@ -9,6 +9,7 @@ import lombok.*;
 @Getter
 @Setter
 public class Physiotherapist {
+    private Integer id;
     private String dni;
     private String specialization;
     private Integer age;

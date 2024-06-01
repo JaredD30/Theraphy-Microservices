@@ -11,6 +11,9 @@
     <file url="file://$PROJECT_DIR$/eureka-server/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/eureka-server/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/health-expertise-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/iot-data-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/iot-data-service/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/iot-data-serviceqw/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/payment-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/payment-service/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/profile-service/src/main/java" charset="UTF-8" />

@@ -10,8 +10,9 @@
         <module name="config-server" />
         <module name="payment-service" />
         <module name="security-service" />
-        <module name="api-gateway" />
         <module name="social-service" />
+        <module name="api-gateway" />
+        <module name="iot-data-service" />
         <module name="profile-service" />
         <module name="therapy-service" />
         <module name="eureka-server" />
@@ -22,6 +23,8 @@
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="config-data" target="20" />
+      <module name="iot-data-sw" target="21" />
+      <module name="profile-service (1)" target="21" />
       <module name="zull-gateway" target="19" />
       <module name="zuul-gateway" target="19" />
     </bytecodeTargetLevel>
@@ -34,8 +37,11 @@
       <module name="echo-service" options="-parameters" />
       <module name="eureka-server" options="-parameters" />
       <module name="health-expertise-service" options="-parameters" />
+      <module name="iot-data-service" options="-parameters" />
+      <module name="iot-data-sw" options="" />
       <module name="payment-service" options="-parameters" />
       <module name="profile-service" options="-parameters" />
+      <module name="profile-service (1)" options="-parameters" />
       <module name="security-service" options="-parameters" />
       <module name="social-service" options="-parameters" />
       <module name="therapy-service" options="-parameters" />

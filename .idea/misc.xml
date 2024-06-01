@@ -16,10 +16,19 @@
         <option value="$PROJECT_DIR$/health-expertise-service/pom.xml" />
         <option value="$PROJECT_DIR$/social-service/pom.xml" />
         <option value="$PROJECT_DIR$/payment-service/pom.xml" />
+        <option value="$PROJECT_DIR$/profile-service1/pom.xml" />
+        <option value="$PROJECT_DIR$/iot-data-service/pom.xml" />
+        <option value="$PROJECT_DIR$/iot-data-serviceqw/pom.xml" />
       </list>
     </option>
+    <option name="ignoredFiles">
+      <set>
+        <option value="$PROJECT_DIR$/iot-data-serviceqw/pom.xml" />
+      </set>
+    </option>
+    <option name="workspaceImportForciblyTurnedOn" value="true" />
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_21" project-jdk-name="openjdk-21" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_21" project-jdk-name="corretto-21" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
   <component name="ProjectType">

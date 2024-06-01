@@ -8,10 +8,11 @@ import com.digitalholics.consultationsservice.Consultation.domain.model.entity.E
 import com.digitalholics.consultationsservice.Consultation.domain.persistence.ConsultationRepository;
 import com.digitalholics.consultationsservice.Consultation.domain.service.ConsultationService;
 
+import com.digitalholics.consultationsservice.Consultation.mapping.ConsultationMapper;
+import com.digitalholics.consultationsservice.Consultation.resource.ConsultationResource;
 import com.digitalholics.consultationsservice.Consultation.resource.CreateConsultationResource;
 import com.digitalholics.consultationsservice.Consultation.resource.UpdateConsultationResource;
 import com.digitalholics.consultationsservice.Shared.EmailService.MailSenderService;
-import com.digitalholics.consultationsservice.Shared.Exception.ResourceNotFoundException;
 import com.digitalholics.consultationsservice.Shared.Exception.ResourceValidationException;
 import com.digitalholics.consultationsservice.Shared.configuration.ExternalConfiguration;
 import jakarta.mail.MessagingException;
@@ -24,7 +25,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -38,13 +38,15 @@ public class ConsultationServiceImpl implements ConsultationService {
     private final Validator validator;
     private final MailSenderService mailService;
     private final ExternalConfiguration externalConfiguration;
+    private final ConsultationMapper mapper;
 
 
-    public ConsultationServiceImpl(ConsultationRepository consultationRepository, Validator validator, MailSenderService mailSenderService, ExternalConfiguration externalConfiguration) {
+    public ConsultationServiceImpl(ConsultationRepository consultationRepository, Validator validator, MailSenderService mailSenderService, ExternalConfiguration externalConfiguration, ConsultationMapper mapper) {
         this.consultationRepository = consultationRepository;
         this.validator = validator;
         this.mailService = mailSenderService;
         this.externalConfiguration = externalConfiguration;
+        this.mapper = mapper;
     }
 
     @Override
@@ -62,6 +64,13 @@ public class ConsultationServiceImpl implements ConsultationService {
         return consultationRepository.findConsultationById(consultationId);
     }
 
+    @Override
+    public ConsultationResource getResourceById(String jwt, Integer therapyId) {
+        ConsultationResource consultationResource = mapper.toResource(getById(therapyId));
+        consultationResource.setPatientId(externalConfiguration.getPatientByID(jwt, consultationResource.getPatientId().getId()));
+        consultationResource.setPhysiotherapistId(externalConfiguration.getPhysiotherapistById(jwt, consultationResource.getPhysiotherapistId().getId()));
+        return consultationResource;
+    }
 
     @Override
     public List<Consultation> getByPhysiotherapistId(Integer physiotherapistId) {
@@ -75,8 +84,33 @@ public class ConsultationServiceImpl implements ConsultationService {
     }
 
     @Override
+    public Page<ConsultationResource> getResourceByPatientId(String jwt, Integer patientId, Pageable pageable) {
+        Page<ConsultationResource> consultation =
+                mapper.modelListPage(getByPatientId(patientId), pageable);
+        consultation.forEach(consultationResource -> {
+            consultationResource.setPatientId(externalConfiguration.getPatientByID(jwt, consultationResource.getPatientId().getId()));
+            consultationResource.setPhysiotherapistId(externalConfiguration.getPhysiotherapistById(jwt, consultationResource.getPhysiotherapistId().getId()));
+        });
+
+        return consultation;
+    }
+
+
+    @Override
     public Consultation getConsultationByPhysiotherapistId(Integer physiotherapistId) {
         return consultationRepository.findConsultationByPhysiotherapistId(physiotherapistId);
+    }
+
+    @Override
+    public Page<ConsultationResource> getResourceByPhysiotherapistId(String jwt, Integer physiotherapistId, Pageable pageable) {
+        Page<ConsultationResource> consultation =
+                mapper.modelListPage(getByPatientId(physiotherapistId), pageable);
+        consultation.forEach(consultationResource -> {
+            consultationResource.setPatientId(externalConfiguration.getPatientByID(jwt, consultationResource.getPatientId().getId()));
+            consultationResource.setPhysiotherapistId(externalConfiguration.getPhysiotherapistById(jwt, consultationResource.getPhysiotherapistId().getId()));
+        });
+
+        return consultation;
     }
 
     @Override

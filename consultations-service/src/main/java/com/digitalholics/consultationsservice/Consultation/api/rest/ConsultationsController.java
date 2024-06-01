@@ -42,9 +42,11 @@ public class ConsultationsController {
     })
     @GetMapping("{consultationId}")
     public ConsultationResource getConsultationById(
-            @Parameter(description = "Consultation id", required = true, examples = @ExampleObject(name = "consultationId", value = "1")) @PathVariable Integer consultationId
+            @Parameter(description = "Consultation id", required = true, examples = @ExampleObject(name = "consultationId", value = "1"))
+            @PathVariable Integer consultationId,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String jwt
     ) {
-        return mapper.toResource(consultationService.getById(consultationId));
+        return consultationService.getResourceById(jwt,consultationId);
     }
 
     @Operation(summary = "Get consultation by patient id", description = "Returns consultation with a provide patient id")
@@ -57,8 +59,11 @@ public class ConsultationsController {
     })
     @GetMapping("byPatientId/{patientId}")
     public Page<ConsultationResource> getConsultationsByPatientId(
-            @Parameter(description = "Patient Id", required = true, examples = @ExampleObject(name = "patientId", value = "1")) @PathVariable Integer patientId, Pageable pageable) {
-        return mapper.modelListPage(consultationService.getByPatientId(patientId), pageable);
+            @Parameter(description = "Physiotherapist Id", required = true, examples = @ExampleObject(name = "physiotherapistId", value = "1"))
+            @PathVariable Integer patientId, Pageable pageable,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String jwt)
+    {
+        return consultationService.getResourceByPatientId(jwt,patientId, pageable);
     }
 
     @Operation(summary = "Get consultations by physiotherapist id", description = "Returns consultations with a provided physiotherapist id")
@@ -71,9 +76,11 @@ public class ConsultationsController {
     })
     @GetMapping("byPhysiotherapistId/{physiotherapistId}")
     public Page<ConsultationResource> getConsultationsByPhysiotherapistId(
-            @Parameter(description = "Physiotherapist Id", required = true, examples = @ExampleObject(name = "physiotherapistId", value = "1")) @PathVariable Integer physiotherapistId, Pageable pageable
+            @Parameter(description = "Physiotherapist Id", required = true, examples = @ExampleObject(name = "physiotherapistId", value = "1"))
+            @PathVariable Integer physiotherapistId, Pageable pageable,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String jwt
     ) {
-        return mapper.modelListPage(consultationService.getByPhysiotherapistId(physiotherapistId), pageable);
+        return consultationService.getResourceByPhysiotherapistId(jwt,physiotherapistId, pageable);
     }
 
     @Operation(summary = "Get consultation by physiotherapist id", description = "Returns consultation with a provided physiotherapist id")

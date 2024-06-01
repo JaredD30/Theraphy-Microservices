@@ -40,6 +40,16 @@ public class ExternalConfiguration {
         return response.getBody();
     }
 
+    public Patient getPatientByID(String jwt, Integer id){
+        String patientServiceUrl = "http://profile-service/api/v1/profile/patients/"+id;
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + jwt);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<Patient> response = restTemplate.exchange(patientServiceUrl, HttpMethod.GET, entity, Patient.class);
+        return response.getBody();
+    }
+
     public Patient getPatientByUserId (String jwt, Integer userId){
         String patientServiceUrl = "http://profile-service/api/v1/profile/patients/byUserId/"+userId;
         HttpHeaders headers = new HttpHeaders();

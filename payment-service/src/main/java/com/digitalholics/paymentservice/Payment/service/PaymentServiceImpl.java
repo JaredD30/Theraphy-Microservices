@@ -16,7 +16,7 @@ public class PaymentServiceImpl {
 
 
 //    @Value("${stripe.key.secret}")
-    String secretKey = "sk_test_51O2RELCjW3JsFKOWQB07Yvz339GJ7ISXQUfzVazmHFWv0HQnIyoUMgOUO20BqbZQ6GSKPpxVCZhtyhveKhcfnxuD00RlBVEhRx";
+    String secretKey = "sk_test_51OEkyaAaa2m1jaAhDgAKgGqy1B0cZPSOvNB8wcecPVlwzBKSwY8hfhDebhpywT9gS6TqHrQbTVuWMDdKeK0ryG7R00hFdjc5uP";
 
     public PaymentIntent paymentIntent(PaymentIntentDTO paymentIntentDTO) throws StripeException {
         Stripe.apiKey = secretKey;

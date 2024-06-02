@@ -1,7 +1,7 @@
 package com.digitalholics.socialservice.Social.resource;
 
-import com.digitalholics.socialservice.Social.resource.Extermal.PatientResource;
-import com.digitalholics.socialservice.Social.resource.Extermal.PhysiotherapistResource;
+import com.digitalholics.socialservice.Social.domain.model.entity.External.Patient;
+import com.digitalholics.socialservice.Social.domain.model.entity.External.Physiotherapist;
 import lombok.*;
 
 @Getter
@@ -13,6 +13,6 @@ public class ReviewResource {
     private Integer id;
     private String content;
     private Integer score;
-    private PhysiotherapistResource physiotherapist;
-    private PatientResource patient;
+    private Physiotherapist physiotherapist;
+    private Patient patient;
 }

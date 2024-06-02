@@ -154,4 +154,11 @@ public class PhysiotherapistServiceImpl implements PhysiotherapistService {
         return ResponseEntity.ok().build();
     }
 
+    @Override
+    public Physiotherapist updatePhysiotherapistRating(String jwt, Integer physiotherapistID, Double rating) {
+        Physiotherapist physiotherapist = physiotherapistRepository.findPhysiotherapistById(physiotherapistID);
+        physiotherapist.setRating(rating);
+        return physiotherapistRepository.save(physiotherapist);
+    }
+
 }

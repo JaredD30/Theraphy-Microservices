@@ -27,4 +27,5 @@ public interface PhysiotherapistService {
     Physiotherapist update(Integer physiotherapistId, UpdatePhysiotherapistResource request);
     ResponseEntity<?> delete(Integer physiotherapistId);
 
+    Physiotherapist updatePhysiotherapistRating(String jwt, Integer physiotherapistId, Double rating);
 }

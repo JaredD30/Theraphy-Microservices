@@ -3,30 +3,27 @@ package com.digitalholics.socialservice.Social.service;
 
 import com.digitalholics.socialservice.Shared.Exception.ResourceNotFoundException;
 import com.digitalholics.socialservice.Shared.Exception.ResourceValidationException;
-import com.digitalholics.socialservice.Shared.JwtValidation.JwtValidator;
+import com.digitalholics.socialservice.Shared.configuration.ExternalConfiguration;
 import com.digitalholics.socialservice.Social.domain.model.entity.External.Patient;
 import com.digitalholics.socialservice.Social.domain.model.entity.External.Physiotherapist;
 import com.digitalholics.socialservice.Social.domain.model.entity.External.User;
 import com.digitalholics.socialservice.Social.domain.model.entity.Review;
-import com.digitalholics.socialservice.Social.domain.persistence.External.PatientRepository;
-import com.digitalholics.socialservice.Social.domain.persistence.External.PhysiotherapistRepository;
 import com.digitalholics.socialservice.Social.domain.persistence.ReviewRepository;
 import com.digitalholics.socialservice.Social.domain.service.ReviewService;
+import com.digitalholics.socialservice.Social.mapping.ReviewMapper;
 import com.digitalholics.socialservice.Social.resource.CreateReviewResource;
+import com.digitalholics.socialservice.Social.resource.ReviewResource;
 import com.digitalholics.socialservice.Social.resource.UpdateReviewResource;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
-import jakarta.ws.rs.NotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.Set;
 
 @Service
@@ -35,18 +32,15 @@ public class ReviewServiceImpl implements ReviewService {
     private static final String ENTITY = "Review";
 
     private final ReviewRepository reviewRepository;
-    private final PhysiotherapistRepository physiotherapistRepository;
-    private final PatientRepository patientRepository;
-
-    private final JwtValidator jwtValidator;
     private final Validator validator;
+    private final ExternalConfiguration externalConfiguration;
+    private final ReviewMapper mapper;
 
-    public ReviewServiceImpl(ReviewRepository reviewRepository, PhysiotherapistRepository physiotherapistRepository, PatientRepository patientRepository, JwtValidator jwtValidator, Validator validator) {
+    public ReviewServiceImpl(ReviewRepository reviewRepository, Validator validator, ExternalConfiguration externalConfiguration, ReviewMapper mapper) {
         this.reviewRepository = reviewRepository;
-        this.physiotherapistRepository = physiotherapistRepository;
-        this.patientRepository = patientRepository;
-        this.jwtValidator = jwtValidator;
         this.validator = validator;
+        this.externalConfiguration = externalConfiguration;
+        this.mapper = mapper;
     }
 
     @Override
@@ -66,6 +60,14 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
+    public ReviewResource getResourceById(String jwt, Integer reviewId) {
+        ReviewResource reviewResource = mapper.toResource(getById(reviewId));
+        reviewResource.setPatient(externalConfiguration.getPatientByID(jwt, reviewResource.getPatient().getId()));
+        reviewResource.setPhysiotherapist(externalConfiguration.getPhysiotherapistById(jwt, reviewResource.getPhysiotherapist().getId()));
+        return reviewResource;
+    }
+
+    @Override
     public List<Review> getByPhysiotherapistId(Integer physiotherapistId) {
         List<Review> reviews = reviewRepository.findByPhysiotherapistId(physiotherapistId);
 
@@ -77,43 +79,56 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
+    public Page<ReviewResource> getResourceByPhysiotherapistId(String jwt, Integer physiotherapistId, Pageable pageable) {
+        Page<ReviewResource> consultation =
+                mapper.modelListPage(getByPhysiotherapistId(physiotherapistId), pageable);
+        consultation.forEach(consultationResource -> {
+            consultationResource.setPatient(externalConfiguration.getPatientByID(jwt, consultationResource.getPatient().getId()));
+            consultationResource.setPhysiotherapist(externalConfiguration.getPhysiotherapistById(jwt, consultationResource.getPhysiotherapist().getId()));
+        });
+
+        return consultation;
+    }
+
+    @Override
     public Review create(String jwt, CreateReviewResource reviewResource) {
         Set<ConstraintViolation<CreateReviewResource>> violations = validator.validate(reviewResource);
 
         if (!violations.isEmpty())
             throw new ResourceValidationException(ENTITY, violations);
 
-        User user = jwtValidator.validateJwtAndGetUser(jwt, "PATIENT");
+        User user = externalConfiguration.getUser(jwt);
 
-        Optional<Patient> patientOptional = Optional.ofNullable(patientRepository.findPatientsByUserUsername(user.getUsername()));
-        Patient patient = patientOptional.orElseThrow(() -> new NotFoundException("Not found patient with email: " + user.getUsername()));
+        if (Objects.equals(String.valueOf(user.getRole()), "ADMIN") || Objects.equals(String.valueOf(user.getRole()), "PATIENT")) {
+            Patient patient = externalConfiguration.getPatientByUserId(jwt, user.getId());
+            Physiotherapist physiotherapist = externalConfiguration.getPhysiotherapistById(jwt, reviewResource.getPhysiotherapistId());
 
+            Review review = new Review();
+            review.setPatientId(patient.getId());
+            review.setPhysiotherapistId(physiotherapist.getId());
+            review.setContent(reviewResource.getContent());
 
-        Optional<Physiotherapist> physiotherapistOptional = physiotherapistRepository.findById(reviewResource.getPhysiotherapistId());
-        Physiotherapist physiotherapist = physiotherapistOptional.orElseThrow(() -> new NotFoundException("Not found physiotherapist with ID: " + reviewResource.getPhysiotherapistId()));
+            // Convertir el score a double
+            double score = Double.parseDouble(reviewResource.getScore().toString());
+            review.setScore(score);
 
-        Review review = new Review();
-        review.setPatient(patient);
-        review.setPhysiotherapist(physiotherapist);
-        review.setContent(reviewResource.getContent());
-        review.setScore(reviewResource.getScore());
+            double rating = 0.0;
+            List<Review> reviewsPhysiotherapist = reviewRepository.findByPhysiotherapistId(physiotherapist.getId());
 
-        double ratingPhysiotherapist = 0.0;
-        List<Review> reviewsPhysiotherapist = reviewRepository.findByPhysiotherapistId(physiotherapist.getId());
+            for (Review existingReview : reviewsPhysiotherapist) {
+                rating += existingReview.getScore();
+            }
+            rating += review.getScore();
+            rating /= (reviewsPhysiotherapist.size() + 1);
 
-        for (Review existingReview : reviewsPhysiotherapist) {
-            ratingPhysiotherapist = ratingPhysiotherapist + existingReview.getScore();
-;        }
-        ratingPhysiotherapist = ratingPhysiotherapist + review.getScore();
-        ratingPhysiotherapist = ratingPhysiotherapist/(reviewsPhysiotherapist.size()+1) ;
+            // Actualizar el rating del fisioterapeuta
+            externalConfiguration.updatePhysiotherapistRating(jwt, reviewResource.getPhysiotherapistId(), rating);
 
-        physiotherapist.setRating(ratingPhysiotherapist);
-
-        physiotherapistRepository.save(physiotherapist);
-
-
-        return reviewRepository.save(review);
+            return reviewRepository.save(review);
+        }
+        throw new ResourceValidationException(ENTITY, "Review not created, because you are not a patient.");
     }
+
 
     @Override
     public Review update( Integer reviewId, UpdateReviewResource request) {

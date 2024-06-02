@@ -104,7 +104,7 @@ public class ConsultationServiceImpl implements ConsultationService {
     @Override
     public Page<ConsultationResource> getResourceByPhysiotherapistId(String jwt, Integer physiotherapistId, Pageable pageable) {
         Page<ConsultationResource> consultation =
-                mapper.modelListPage(getByPatientId(physiotherapistId), pageable);
+                mapper.modelListPage(getByPhysiotherapistId(physiotherapistId), pageable);
         consultation.forEach(consultationResource -> {
             consultationResource.setPatientId(externalConfiguration.getPatientByID(jwt, consultationResource.getPatientId().getId()));
             consultationResource.setPhysiotherapistId(externalConfiguration.getPhysiotherapistById(jwt, consultationResource.getPhysiotherapistId().getId()));

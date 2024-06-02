@@ -7,6 +7,7 @@ import com.digitalholics.healthexpertiseservice.HealthExpertise.resource.Job.Cre
 import com.digitalholics.healthexpertiseservice.HealthExpertise.resource.Job.JobResource;
 import com.digitalholics.healthexpertiseservice.HealthExpertise.resource.Job.UpdateJobResource;
 
+import com.digitalholics.healthexpertiseservice.HealthExpertise.resource.MedicalHistory.CreateMedicalHistoryResource;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -17,6 +18,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -85,8 +87,15 @@ public class JobsController {
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = { @Content(schema = @Schema()) })
     })
     @PostMapping
-    public ResponseEntity<JobResource> createJob(@RequestHeader("Authorization") String jwt, @RequestBody CreateJobResource resource) {
-        return new ResponseEntity<>(mapper.toResource(jobService.create(jwt, resource)), HttpStatus.CREATED);
+    public ResponseEntity<JobResource> createJob(
+            //@RequestHeader("Authorization") String jwt, @RequestBody CreateJobResource resource
+            @RequestBody CreateJobResource resource,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+        //return new ResponseEntity<>(mapper.toResource(jobService.create(jwt, resource)), HttpStatus.CREATED);
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            authorizationHeader = authorizationHeader.substring(7);
+        }
+        return new ResponseEntity<>(mapper.toResource(jobService.create(authorizationHeader,(resource))), HttpStatus.CREATED);
     }
 
     @Operation(summary = "Update a job partially", description = "Updates a job partially based on the provided data")
@@ -103,7 +112,7 @@ public class JobsController {
             @PathVariable Integer jobId,
             @RequestBody UpdateJobResource request
     ) {
-        return new ResponseEntity<>(mapper.toResource(jobService.update(jwt, jobId,request)), HttpStatus.CREATED);
+        return new ResponseEntity<>(mapper.toResource(jobService.updatePositionOrganization(jwt, jobId,request)), HttpStatus.CREATED);
     }
 
     @Operation(summary = "Delete a job", description = "Delete a job with a provided id")

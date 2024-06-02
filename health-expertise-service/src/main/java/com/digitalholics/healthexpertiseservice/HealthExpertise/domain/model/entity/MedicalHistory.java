@@ -1,7 +1,6 @@
 package com.digitalholics.healthexpertiseservice.HealthExpertise.domain.model.entity;
 
-import com.digitalholics.healthexpertiseservice.HealthExpertise.domain.model.entity.External.Patient;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -20,10 +19,9 @@ public class MedicalHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne
+
     @JoinColumn(name = "patient_id")
-    @JsonIgnore
-    private Patient patient;
+    private Integer patientId;
 
     @NotNull
     @NotBlank

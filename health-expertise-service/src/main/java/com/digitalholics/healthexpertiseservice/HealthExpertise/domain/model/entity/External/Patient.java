@@ -13,36 +13,16 @@ import lombok.*;
 @With
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "patients")
+
 public class Patient {
 
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
-    @Size(min = 8, max = 8)
     private String dni;
-
-    @Min(18)
     private Integer age;
-
-    @Column(name = "photo_url")
     private String photoUrl;
-
-    @Column(name = "birthday_date")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private String birthdayDate;
-
-    @Min(0)
     private Integer appointmentQuantity;
-
     private String location;
-
-    @OneToOne
-    @JoinColumn(name = "user_id")
-    @JsonIgnore
     private User user;
 
 }

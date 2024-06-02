@@ -1,6 +1,6 @@
 package com.digitalholics.healthexpertiseservice.HealthExpertise.resource.Job;
 
-import com.digitalholics.healthexpertiseservice.HealthExpertise.resource.External.PhysiotherapistResource;
+import com.digitalholics.healthexpertiseservice.HealthExpertise.domain.model.entity.External.Physiotherapist;
 import lombok.*;
 
 @Getter
@@ -10,7 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 public class JobResource {
     private Integer id;
-    private PhysiotherapistResource physiotherapist;
+    private Physiotherapist physiotherapist;
     private String position;
     private String organization;
 }

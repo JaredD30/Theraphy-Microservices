@@ -1,6 +1,6 @@
 package com.digitalholics.healthexpertiseservice.HealthExpertise.resource.Certification;
 
-import com.digitalholics.healthexpertiseservice.HealthExpertise.resource.External.PhysiotherapistResource;
+import com.digitalholics.healthexpertiseservice.HealthExpertise.domain.model.entity.External.Physiotherapist;
 import lombok.*;
 
 @Getter
@@ -10,7 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 public class CertificationResource {
     private Integer id;
-    private PhysiotherapistResource physiotherapist;
+    private Physiotherapist physiotherapist;
     private String title;
     private String school;
     private Integer year;

@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -46,20 +47,6 @@ public class MedicalHistoriesController {
         return mapper.modelListPage(medicalHistoryService.getAll(jwt), pageable);
     }
 
-    @Operation(summary = "Get medical history by id", description = "Returns medical history with a provide id")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully got"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = { @Content(schema = @Schema()) }),
-            @ApiResponse(responseCode = "403", description = "Forbidden", content = { @Content(schema = @Schema()) }),
-            @ApiResponse(responseCode = "404", description = "Not Found", content = { @Content(schema = @Schema()) })
-    })
-    @GetMapping("{medicalHistoryId}")
-    public MedicalHistoryResource getMedicalHistoryById(
-            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
-            @Parameter(description = "Medical History Id", required = true, examples = @ExampleObject(name = "medicalHistoryId", value = "1")) @PathVariable Integer medicalHistoryId) {
-        return mapper.toResource(medicalHistoryService.getById(jwt, medicalHistoryId));
-    }
-
     @Operation(summary = "Get medical history by patient id", description = "Returns medical history with a provide patient id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully got"),
@@ -71,7 +58,7 @@ public class MedicalHistoriesController {
     public MedicalHistoryResource getMedicalHistoryByPatientId(
             @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
             @Parameter(description = "Patient Id", required = true, examples = @ExampleObject(name = "patientId", value = "1")) @PathVariable Integer patientId, Pageable pageable) {
-        return mapper.toResource(medicalHistoryService.getByPatientId(jwt, patientId));
+        return medicalHistoryService.getResourceByPatientId(jwt, patientId);
     }
 
     @Operation(summary = "Create medical history", description = "Register a medical history")
@@ -84,10 +71,16 @@ public class MedicalHistoriesController {
     })
     @PostMapping
     public ResponseEntity<MedicalHistoryResource> createMedicalHistory(
-            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
-            @RequestBody CreateMedicalHistoryResource resource) {
-        return new ResponseEntity<>(mapper.toResource(medicalHistoryService.create(jwt, resource)), HttpStatus.CREATED);
-    }
+          //  @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
+        //    @RequestBody CreateMedicalHistoryResource resource) {
+        //return new ResponseEntity<>(mapper.toResource(medicalHistoryService.create(jwt, resource)), HttpStatus.CREATED);
+    @RequestBody CreateMedicalHistoryResource resource,
+          @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            authorizationHeader = authorizationHeader.substring(7);
+        }
+        return new ResponseEntity<>(mapper.toResource(medicalHistoryService.create(authorizationHeader,(resource))), HttpStatus.CREATED);
+ }
 
     @Operation(summary = "Update a medical history partially", description = "Updates a medical history partially based on the provided data")
     @ApiResponses(value = {

@@ -1,9 +1,7 @@
 package com.digitalholics.healthexpertiseservice.HealthExpertise.domain.model.entity;
 
 
-import com.digitalholics.healthexpertiseservice.HealthExpertise.domain.model.entity.External.Patient;
-import com.digitalholics.healthexpertiseservice.HealthExpertise.domain.model.entity.External.Physiotherapist;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -22,15 +20,14 @@ public class Diagnosis {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne
-    @JoinColumn(name = "physiotherapist_id")
-    @JsonIgnore
-    private Physiotherapist physiotherapist;
 
-    @ManyToOne
+    @JoinColumn(name = "physiotherapist_id")
+    private Integer physiotherapistId;
+
+
     @JoinColumn(name = "patient_id")
-    @JsonIgnore
-    private Patient patient;
+
+    private Integer patientId;
 
     private String diagnosis;
 

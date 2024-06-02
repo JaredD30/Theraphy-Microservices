@@ -1,48 +1,37 @@
 package com.digitalholics.healthexpertiseservice.HealthExpertise.service;
 
-import com.digitalholics.healthexpertiseservice.HealthExpertise.domain.model.entity.External.Physiotherapist;
+
+import com.digitalholics.healthexpertiseservice.HealthExpertise.domain.model.entity.Certification;
 import com.digitalholics.healthexpertiseservice.HealthExpertise.domain.model.entity.External.User;
 import com.digitalholics.healthexpertiseservice.HealthExpertise.domain.model.entity.Job;
-import com.digitalholics.healthexpertiseservice.HealthExpertise.domain.persistence.External.PhysiotherapistRepository;
-import com.digitalholics.healthexpertiseservice.HealthExpertise.domain.persistence.External.UserRepository;
 import com.digitalholics.healthexpertiseservice.HealthExpertise.domain.persistence.JobRepository;
 import com.digitalholics.healthexpertiseservice.HealthExpertise.domain.service.JobService;
 import com.digitalholics.healthexpertiseservice.HealthExpertise.resource.Job.CreateJobResource;
 import com.digitalholics.healthexpertiseservice.HealthExpertise.resource.Job.UpdateJobResource;
 import com.digitalholics.healthexpertiseservice.Shared.Exception.ResourceNotFoundException;
 import com.digitalholics.healthexpertiseservice.Shared.Exception.ResourceValidationException;
-import com.digitalholics.healthexpertiseservice.Shared.JwtValidation.JwtValidator;
+import com.digitalholics.healthexpertiseservice.Shared.configuration.ExternalConfiguration;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
-import jakarta.ws.rs.NotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 
 @Service
 public class JobServiceImpl implements JobService {
     private static final String ENTITY = "Job";
-
     private final JobRepository jobRepository;
-    private final PhysiotherapistRepository physiotherapistRepository;
-    private final JwtValidator jwtValidator;
     private final Validator validator;
+    private final ExternalConfiguration externalConfiguration;
 
 
-    public JobServiceImpl(JobRepository jobRepository, PhysiotherapistRepository physiotherapistRepository, JwtValidator jwtValidator, Validator validator) {
+    public JobServiceImpl(JobRepository jobRepository,  Validator validator, ExternalConfiguration externalConfiguration) {
         this.jobRepository = jobRepository;
-        this.physiotherapistRepository = physiotherapistRepository;
-        this.jwtValidator = jwtValidator;
+        this.externalConfiguration = externalConfiguration;
         this.validator = validator;
     }
 
@@ -81,14 +70,9 @@ public class JobServiceImpl implements JobService {
         if (!violations.isEmpty())
             throw new ResourceValidationException(ENTITY, violations);
 
-
-        User user = jwtValidator.validateJwtAndGetUser(jwt, "PHYSIOTHERAPIST");
-
-        Optional<Physiotherapist> physiotherapistOptional = Optional.ofNullable(physiotherapistRepository.findPhysiotherapistByUserUsername(user.getUsername()));
-        Physiotherapist physiotherapist = physiotherapistOptional.orElseThrow(() -> new NotFoundException("Not found patient with email: " + user.getUsername()));
-
+        User user = externalConfiguration.getUser(jwt);
         Job job= new Job();
-        job.setPhysiotherapist(physiotherapist);
+        job.setPhysiotherapistId(user.getId());
         job.setPosition(jobResource.getPosition());
         job.setOrganization(jobResource.getOrganization());
 
@@ -97,37 +81,46 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public Job update(String jwt, Integer jobId, UpdateJobResource request) {
-        User user = jwtValidator.validateJwtAndGetUser(jwt, "PHYSIOTHERAPIST");
 
-        Job job = getById(jobId);
+            Job job = getById(jobId);
 
-        if(Objects.equals(user.getUsername(), job.getPhysiotherapist().getUser().getUsername()) || Objects.equals(String.valueOf(user.getRole()), "ADMIN")) {
             if (request.getPosition() != null) {
                 job.setPosition(request.getPosition());
             }
             if (request.getOrganization() != null) {
                 job.setOrganization(request.getOrganization());
-            }
 
-            return jobRepository.save(job);
-        }
+                return jobRepository.save(job);
+            }
 
         throw new ResourceValidationException("JWT",
                 "Invalid access.");
     }
 
     @Override
+    public Job updatePositionOrganization(String jwt, Integer jobId, UpdateJobResource request) {
+
+        Job job = getById(jobId);
+
+        if(job == null)
+            throw new ResourceValidationException(ENTITY,
+                    "Not found Medical History with ID:"+ jobId);
+
+        if (request.getPosition() != null) {
+            job.setPosition(request.getPosition());
+        }
+        if (request.getOrganization() != null) {
+            job.setOrganization(request.getOrganization());
+        }
+
+        return jobRepository.save(job);
+    }
+    @Override
     public ResponseEntity<?> delete(String jwt, Integer jobId) {
 
-        User user = jwtValidator.validateJwtAndGetUser(jwt, "PHYSIOTHERAPIST");
-
         return jobRepository.findById(jobId).map(job -> {
-            if(Objects.equals(user.getUsername(), job.getPhysiotherapist().getUser().getUsername()) || Objects.equals(String.valueOf(user.getRole()), "ADMIN")){
                 jobRepository.delete(job);
                 return ResponseEntity.ok().build();
-            }
-            throw new ResourceValidationException("JWT",
-                    "Invalid access.");
         }).orElseThrow(()-> new ResourceNotFoundException(ENTITY,jobId));
     }
 

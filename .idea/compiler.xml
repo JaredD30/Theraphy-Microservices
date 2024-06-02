@@ -37,7 +37,7 @@
       <module name="payment-service" options="-parameters" />
       <module name="profile-service" options="-parameters" />
       <module name="security-service" options="-parameters" />
-      <module name="social-service" options="" />
+      <module name="social-service" options="-parameters" />
       <module name="therapy-service" options="-parameters" />
       <module name="zull-gateway" options="-parameters" />
       <module name="zuul-gateway" options="-parameters" />

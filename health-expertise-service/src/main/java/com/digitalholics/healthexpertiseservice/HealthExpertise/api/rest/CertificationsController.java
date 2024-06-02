@@ -5,6 +5,7 @@ import com.digitalholics.healthexpertiseservice.HealthExpertise.mapping.Certific
 import com.digitalholics.healthexpertiseservice.HealthExpertise.resource.Certification.CertificationResource;
 import com.digitalholics.healthexpertiseservice.HealthExpertise.resource.Certification.CreateCertificationResource;
 import com.digitalholics.healthexpertiseservice.HealthExpertise.resource.Certification.UpdateCertificationResource;
+import com.digitalholics.healthexpertiseservice.HealthExpertise.resource.MedicalHistory.CreateMedicalHistoryResource;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -15,6 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,9 +26,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Certifications", description = "Certifications operations: listing, retrieval, creation, update, and deletion")
 public class CertificationsController {
     private final CertificationService certificationService;
-
     private final CertificationMapper mapper;
-
 
     public CertificationsController(CertificationService certificationService, CertificationMapper mapper) {
         this.certificationService = certificationService;
@@ -85,9 +85,15 @@ public class CertificationsController {
     })
     @PostMapping
     public ResponseEntity<CertificationResource> createCertification(
-            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
-            @RequestBody CreateCertificationResource resource) {
-        return new ResponseEntity<>(mapper.toResource(certificationService.create(jwt, resource)), HttpStatus.CREATED);
+            //@Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
+            //@RequestBody CreateCertificationResource resource) {
+        //return new ResponseEntity<>(mapper.toResource(certificationService.create(jwt, resource)), HttpStatus.CREATED);
+            @RequestBody CreateCertificationResource resource,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            authorizationHeader = authorizationHeader.substring(7);
+        }
+        return new ResponseEntity<>(mapper.toResource(certificationService.create(authorizationHeader,(resource))), HttpStatus.CREATED);
     }
 
     @Operation(summary = "Update a certification partially", description = "Updates a certification partially based on the provided data")
@@ -104,7 +110,7 @@ public class CertificationsController {
             @Parameter(description = "Certification Id", required = true, examples = @ExampleObject(name = "certificationId", value = "1")) @PathVariable Integer certificationId,
             @RequestBody UpdateCertificationResource request
     ) {
-        return new ResponseEntity<>(mapper.toResource(certificationService.update(jwt, certificationId,request)), HttpStatus.CREATED);
+        return new ResponseEntity<>(mapper.toResource(certificationService.updateTitleSchoolYear(jwt, certificationId,request)), HttpStatus.CREATED);
     }
 
     @Operation(summary = "Delete a certification", description = "Delete a certification with a provided id")

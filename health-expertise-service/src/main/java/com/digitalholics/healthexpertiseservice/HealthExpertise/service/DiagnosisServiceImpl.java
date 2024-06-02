@@ -1,28 +1,24 @@
 package com.digitalholics.healthexpertiseservice.HealthExpertise.service;
 
 import com.digitalholics.healthexpertiseservice.HealthExpertise.domain.model.entity.Diagnosis;
-import com.digitalholics.healthexpertiseservice.HealthExpertise.domain.model.entity.External.Consultation;
 import com.digitalholics.healthexpertiseservice.HealthExpertise.domain.model.entity.External.Patient;
 import com.digitalholics.healthexpertiseservice.HealthExpertise.domain.model.entity.External.Physiotherapist;
 import com.digitalholics.healthexpertiseservice.HealthExpertise.domain.model.entity.External.User;
 import com.digitalholics.healthexpertiseservice.HealthExpertise.domain.persistence.DiagnosisRepository;
-import com.digitalholics.healthexpertiseservice.HealthExpertise.domain.persistence.External.ConsultationRepository;
-import com.digitalholics.healthexpertiseservice.HealthExpertise.domain.persistence.External.PatientRepository;
-import com.digitalholics.healthexpertiseservice.HealthExpertise.domain.persistence.External.PhysiotherapistRepository;
-import com.digitalholics.healthexpertiseservice.HealthExpertise.domain.persistence.External.UserRepository;
+
 import com.digitalholics.healthexpertiseservice.HealthExpertise.domain.service.DiagnosisService;
+import com.digitalholics.healthexpertiseservice.HealthExpertise.mapping.DiagnosisMapper;
+import com.digitalholics.healthexpertiseservice.HealthExpertise.resource.Diagnosis.CreateDiagnosisResource;
+import com.digitalholics.healthexpertiseservice.HealthExpertise.resource.Diagnosis.DiagnosisResource;
 import com.digitalholics.healthexpertiseservice.Shared.Exception.ResourceNotFoundException;
 import com.digitalholics.healthexpertiseservice.Shared.Exception.ResourceValidationException;
-import com.digitalholics.healthexpertiseservice.Shared.JwtValidation.JwtValidator;
+import com.digitalholics.healthexpertiseservice.Shared.configuration.ExternalConfiguration;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
-import jakarta.ws.rs.NotFoundException;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 
 import java.util.*;
@@ -30,34 +26,27 @@ import java.util.*;
 @Service
 public class DiagnosisServiceImpl implements DiagnosisService {
     private static final String ENTITY = "Diagnosis";
-
     private final DiagnosisRepository diagnosisRepository;
-
-    private final PhysiotherapistRepository physiotherapistRepository;
-    private final PatientRepository patientRepository;
-    private final ConsultationRepository consultationRepository;
-    private final JwtValidator jwtValidator;
     private final Validator validator;
+    private final ExternalConfiguration externalConfiguration;
+
+    private final DiagnosisMapper mapper;
 
 
-    public DiagnosisServiceImpl(DiagnosisRepository diagnosisRepository, PhysiotherapistRepository physiotherapistRepository, PatientRepository patientRepository, ConsultationRepository consultationRepository, JwtValidator jwtValidator, Validator validator) {
+    public DiagnosisServiceImpl(DiagnosisRepository diagnosisRepository, Validator validator, ExternalConfiguration externalConfiguration, DiagnosisMapper mapper) {
         this.diagnosisRepository = diagnosisRepository;
-        this.physiotherapistRepository = physiotherapistRepository;
-        this.patientRepository = patientRepository;
-        this.consultationRepository = consultationRepository;
-        this.jwtValidator = jwtValidator;
+        this.externalConfiguration = externalConfiguration;
         this.validator = validator;
+        this.mapper = mapper;
     }
 
     @Override
     public Diagnosis getLast(String jwt) {
 
-        User user = jwtValidator.validateJwtAndGetUser(jwt, "PATIENT");
+        //User user = jwtValidator.validateJwtAndGetUser(jwt, "PATIENT");
+        User user = externalConfiguration.getUser(jwt);
 
-        Optional<Patient> patientOptional = Optional.ofNullable(patientRepository.findPatientsByUserUsername(user.getUsername()));
-        Patient patient = patientOptional.orElseThrow(() -> new NotFoundException("Not found patient with email: " + user.getUsername()));
-
-
+        Patient patient = externalConfiguration.getPatientByUserId(jwt,user.getId());
         List<Diagnosis> allDiagnoses = diagnosisRepository.findByPatientId(patient.getId());
 
         if (allDiagnoses.isEmpty()) {
@@ -69,63 +58,9 @@ public class DiagnosisServiceImpl implements DiagnosisService {
         return allDiagnoses.get(0);
     }
 
+
     @Override
-    public List<Diagnosis> getByPatientId(String jwt, Integer patientId) {
-
-        User user = jwtValidator.validateJwtAndGetUserNoRol(jwt);
-
-        if(Objects.equals(String.valueOf(user.getRole()), "PATIENT")){
-            Optional<Patient> patientOptional = patientRepository.findById(patientId);
-            Patient patient = patientOptional.orElseThrow(() -> new NotFoundException("Not found patient with ID: " + patientId));
-
-            if(Objects.equals(String.valueOf(user.getUsername()), patient.getUser().getUsername())){
-                List<Diagnosis> diagnosis = diagnosisRepository.findByPatientId(patientId);
-
-                if(diagnosis.isEmpty())
-                    throw new ResourceValidationException(ENTITY,
-                            "Not found Diagnosis for this patient");
-
-                return diagnosis;
-            }
-
-            throw new ResourceValidationException("JWT",
-                    "Invalid access.");
-
-        }
-
-        if(Objects.equals(String.valueOf(user.getRole()), "PHYSIOTHERAPIST")){
-            Optional<Patient> patientOptional = patientRepository.findById(patientId);
-            Patient patient = patientOptional.orElseThrow(() -> new NotFoundException("Not found patient with ID: " + patientId));
-
-            Optional<Physiotherapist> physiotherapistOptional = Optional.ofNullable(physiotherapistRepository.findPhysiotherapistByUserUsername(user.getUsername()));
-            Physiotherapist physiotherapist = physiotherapistOptional.orElseThrow(() -> new NotFoundException("Not found patient with email: " + user.getUsername()));
-
-            List<Consultation> myConsultations = consultationRepository.findByPhysiotherapistId(physiotherapist.getId());
-
-
-            boolean isMyPatient = false;
-
-            for (Consultation consultation : myConsultations) {
-                if (Objects.equals(consultation.getPatient().getUser().getUsername(), patient.getUser().getUsername())) {
-
-                        isMyPatient = true;
-                        break;
-                }
-            }
-
-            if (isMyPatient) {
-                List<Diagnosis> diagnosis = diagnosisRepository.findByPatientId(patientId);
-
-                if(diagnosis.isEmpty())
-                    throw new ResourceValidationException(ENTITY,
-                            "Not found Diagnosis for this patient");
-
-                return diagnosis;
-            }
-
-            throw new ResourceValidationException("JWT",
-                    "Invalid access.");
-        }
+    public List<Diagnosis> getByPatientId(Integer patientId) {
 
         List<Diagnosis> diagnosis = diagnosisRepository.findByPatientId(patientId);
 
@@ -137,14 +72,39 @@ public class DiagnosisServiceImpl implements DiagnosisService {
     }
 
     @Override
-    public Diagnosis create(Diagnosis diagnosisResource) {
+    public Page<DiagnosisResource> getResourceByPatientId(String jwt, Pageable pageable, Integer patientId) {
+        Page<DiagnosisResource> diagnoses =
+                mapper.modelListPage(getByPatientId(patientId), pageable);
 
-        Set<ConstraintViolation<Diagnosis>> violations = validator.validate(diagnosisResource);
+
+        diagnoses.forEach(diagnosisResource -> {
+            diagnosisResource.setPatient(externalConfiguration.getPatientByID(jwt, diagnosisResource.getPatient().getId()));
+            diagnosisResource.setPhysiotherapist(externalConfiguration.getPhysiotherapistById(jwt, diagnosisResource.getPhysiotherapist().getId()));
+        });
+
+        return diagnoses;
+    }
+
+
+    @Override
+    public Diagnosis create(String jwt, CreateDiagnosisResource diagnosisResource) {
+
+        Set<ConstraintViolation<CreateDiagnosisResource>> violations = validator.validate(diagnosisResource);
 
         if (!violations.isEmpty())
             throw new ResourceValidationException(ENTITY, violations);
 
-        return diagnosisRepository.save(diagnosisResource);
+        User user = externalConfiguration.getUser(jwt);
+
+        Physiotherapist physiotherapist =  externalConfiguration.getPhysiotherapistByUserId(jwt, user.getId());
+        Patient patient = externalConfiguration.getPatientByID(jwt, diagnosisResource.getPatientId());
+        Diagnosis diagnosis = new Diagnosis();
+        diagnosis.setPhysiotherapistId(physiotherapist.getId());
+        diagnosis.setPatientId(patient.getId());
+        diagnosis.setDiagnosis(diagnosisResource.getDiagnosis());
+        diagnosis.setDate(diagnosisResource.getDate());
+
+        return diagnosisRepository.save(diagnosis);
     }
 
     @Override

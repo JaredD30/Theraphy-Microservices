@@ -1,7 +1,6 @@
 package com.digitalholics.healthexpertiseservice.HealthExpertise.domain.model.entity;
 
-import com.digitalholics.healthexpertiseservice.HealthExpertise.domain.model.entity.External.Physiotherapist;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -19,10 +18,9 @@ public class Job {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne
+
     @JoinColumn(name = "physiotherapist_id")
-    @JsonIgnore
-    private Physiotherapist physiotherapist;
+    private Integer physiotherapistId;
 
     @NotBlank
     @NotNull

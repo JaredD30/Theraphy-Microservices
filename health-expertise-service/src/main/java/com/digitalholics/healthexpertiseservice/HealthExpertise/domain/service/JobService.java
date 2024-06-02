@@ -1,6 +1,7 @@
 package com.digitalholics.healthexpertiseservice.HealthExpertise.domain.service;
 
 
+import com.digitalholics.healthexpertiseservice.HealthExpertise.domain.model.entity.Certification;
 import com.digitalholics.healthexpertiseservice.HealthExpertise.domain.model.entity.Job;
 import com.digitalholics.healthexpertiseservice.HealthExpertise.resource.Job.CreateJobResource;
 import com.digitalholics.healthexpertiseservice.HealthExpertise.resource.Job.UpdateJobResource;
@@ -17,5 +18,8 @@ public interface JobService {
     List<Job> getByPhysiotherapistId(Integer physiotherapistId);
     Job create(String jwt, CreateJobResource job);
     Job update(String jwt, Integer jobId, UpdateJobResource request);
+
+    Job updatePositionOrganization(String jwt, Integer jobId, UpdateJobResource request);
+
     ResponseEntity<?> delete(String jwt, Integer jobId);
 }

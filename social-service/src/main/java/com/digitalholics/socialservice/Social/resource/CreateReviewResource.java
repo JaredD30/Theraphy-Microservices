@@ -10,6 +10,6 @@ import lombok.*;
 public class CreateReviewResource {
     private Integer id;
     private String content;
-    private Integer score;
+    private Double score;
     private Integer physiotherapistId;
 }

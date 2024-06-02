@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,7 +42,9 @@ public class ReviewsController {
             @ApiResponse(responseCode = "404", description = "Not Found", content = { @Content(schema = @Schema()) })
     })
     @GetMapping
-    public Page<ReviewResource> getAllReviews(@RequestHeader("Authorization") String jwt, Pageable pageable) {
+    public Page<ReviewResource> getAllReviews(
+            @RequestHeader("Authorization") String jwt,
+            Pageable pageable) {
         return mapper.modelListPage(reviewService.getAll(), pageable);
     }
 
@@ -57,7 +60,7 @@ public class ReviewsController {
             @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
             @Parameter(description = "Review Id", required = true, examples = @ExampleObject(name = "reviewId", value = "1")) @PathVariable Integer reviewId
     ) {
-        return mapper.toResource(reviewService.getById(reviewId));
+        return reviewService.getResourceById(jwt,reviewId);
     }
 
     @Operation(summary = "Get reviews by physiotherapist id", description = "Returns reviews with a provided physiotherapist id")
@@ -72,7 +75,7 @@ public class ReviewsController {
             @Parameter(hidden = true)@RequestHeader("Authorization") String jwt,
             @Parameter(description = "Physiotherapist Id", required = true, examples = @ExampleObject(name = "physiotherapistId", value = "1")) @PathVariable Integer physiotherapistId, Pageable pageable
     ) {
-        return mapper.modelListPage(reviewService.getByPhysiotherapistId(physiotherapistId), pageable);
+        return reviewService.getResourceByPhysiotherapistId(jwt,physiotherapistId, pageable);
     }
 
     @Operation(summary = "Create review", description = "Register a review")
@@ -85,8 +88,13 @@ public class ReviewsController {
     })
     @PostMapping
     public ResponseEntity<ReviewResource> createReview(
-            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt, @RequestBody CreateReviewResource resource) {
-        return new ResponseEntity<>(mapper.toResource(reviewService.create(jwt,resource)), HttpStatus.CREATED);
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
+            @RequestBody CreateReviewResource resource
+    ) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            authorizationHeader = authorizationHeader.substring(7); // Quita "Bearer " del token
+        }
+        return new ResponseEntity<>(mapper.toResource(reviewService.create(authorizationHeader, resource)), HttpStatus.CREATED);
     }
 
     @Operation(summary = "Update a review partially", description = "Updates a review partially based on the provided data")

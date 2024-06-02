@@ -2,9 +2,9 @@ package com.digitalholics.profileservice.Profile.api.rest;
 
 
 
+import com.digitalholics.profileservice.Profile.domain.model.entity.Physiotherapist;
 import com.digitalholics.profileservice.Profile.domain.service.PhysiotherapistService;
 import com.digitalholics.profileservice.Profile.mapping.PhysiotherapistMapper;
-import com.digitalholics.profileservice.Profile.resource.Patient.PatientResource;
 import com.digitalholics.profileservice.Profile.resource.Physiotherapist.CreatePhysiotherapistResource;
 import com.digitalholics.profileservice.Profile.resource.Physiotherapist.PhysiotherapistResource;
 import com.digitalholics.profileservice.Profile.resource.Physiotherapist.UpdatePhysiotherapistResource;
@@ -134,5 +134,13 @@ public class PhysiotherapistController {
             @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
             @Parameter(description = "Physiotherapist Id", required = true, examples = @ExampleObject(name = "physiotherapistId", value = "1")) @PathVariable Integer physiotherapistId) {
         return physiotherapistService.delete(physiotherapistId);
+    }
+
+    @PostMapping("/{physiotherapistsId}/rating")
+    public Physiotherapist updatePhysiotherapistReviews(
+            @RequestHeader("Authorization") String jwt,
+            @PathVariable Integer physiotherapistsId,
+            @RequestBody Double reviews) {
+        return physiotherapistService.updatePhysiotherapistRating(jwt, physiotherapistsId, reviews);
     }
 }

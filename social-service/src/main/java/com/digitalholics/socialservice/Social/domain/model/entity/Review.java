@@ -28,16 +28,10 @@ public class Review {
 
     @Max(5)
     @Min(1)
-    private Integer score;
+    private double score;
 
-    @ManyToOne
-    @JoinColumn(name = "physiotherapist_id")
-    @JsonIgnore
-    private Physiotherapist physiotherapist;
+    private Integer physiotherapistId;
 
-    @ManyToOne
-    @JoinColumn(name = "patient_id")
-    @JsonIgnore
-    private Patient patient;
+    private Integer patientId;
 
 }

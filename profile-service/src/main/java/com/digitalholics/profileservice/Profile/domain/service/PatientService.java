@@ -21,4 +21,6 @@ public interface PatientService {
     Patient create(CreatePatientResource patient,String jwt);
     Patient update(Integer patientId, UpdatePatientResource request);
     ResponseEntity<?> delete(Integer patientId);
+
+    Patient updatePatientAppointmentQuantity(String jwt, Integer patientId, Integer appointmentQuantity);
 }

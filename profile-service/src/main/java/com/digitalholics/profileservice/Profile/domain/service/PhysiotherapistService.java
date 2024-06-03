@@ -28,4 +28,8 @@ public interface PhysiotherapistService {
     ResponseEntity<?> delete(Integer physiotherapistId);
 
     Physiotherapist updatePhysiotherapistRating(String jwt, Integer physiotherapistId, Double rating);
+
+    Physiotherapist updatePhysiotherapistConsultationQuantity(String jwt, Integer physiotherapistID, Integer consultation);
+
+    Physiotherapist updatePhysiotherapistPatientQuantity(String jwt, Integer physiotherapistID, Integer patientQuantity);
 }

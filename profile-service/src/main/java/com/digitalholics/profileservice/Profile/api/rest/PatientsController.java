@@ -121,4 +121,13 @@ public class PatientsController {
             @Parameter(description = "Patient Id", required = true, examples = @ExampleObject(name = "patientId", value = "1")) @PathVariable Integer patientId) {
         return patientService.delete(patientId);
     }
+
+    @PostMapping("/{patientId}/appointmentQuantity")
+    public Patient updatePhysiotherapistPatientsQuantity(
+            @RequestHeader("Authorization") String jwt,
+            @PathVariable Integer patientId,
+            @RequestBody Integer appointmentQuantity) {
+        return patientService.updatePatientAppointmentQuantity(jwt, patientId, appointmentQuantity);
+    }
+
 }

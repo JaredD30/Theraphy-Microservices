@@ -3,10 +3,7 @@ package com.digitalholics.consultationsservice.Shared.configuration;
 import com.digitalholics.consultationsservice.Consultation.domain.model.entity.External.Patient;
 import com.digitalholics.consultationsservice.Consultation.domain.model.entity.External.Physiotherapist;
 import com.digitalholics.consultationsservice.Consultation.domain.model.entity.External.User;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -37,6 +34,28 @@ public class ExternalConfiguration {
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
         ResponseEntity<Physiotherapist> response = restTemplate.exchange(physiotherapistServiceUrl, HttpMethod.GET, entity, Physiotherapist.class);
+        return response.getBody();
+    }
+
+    public Physiotherapist updatePhysiotherapistConsultationQuantity(String jwt, Integer physiotherapistId, Integer consultationQuantity) {
+        String physiotherapistServiceUrl = "http://profile-service/api/v1/profile/physiotherapists/" + physiotherapistId + "/consultationQuantity";
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + jwt);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<Integer> entity = new HttpEntity<>(consultationQuantity, headers);
+        ResponseEntity<Physiotherapist> response = restTemplate.exchange(physiotherapistServiceUrl, HttpMethod.POST, entity, Physiotherapist.class);
+        return response.getBody();
+    }
+
+    public Physiotherapist updatePhysiotherapistPatientsQuantity(String jwt, Integer physiotherapistId, Integer patientsQuantity) {
+        String physiotherapistServiceUrl = "http://profile-service/api/v1/profile/physiotherapists/" + physiotherapistId + "/patientsQuantity";
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + jwt);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<Integer> entity = new HttpEntity<>(patientsQuantity, headers);
+        ResponseEntity<Physiotherapist> response = restTemplate.exchange(physiotherapistServiceUrl, HttpMethod.POST, entity, Physiotherapist.class);
         return response.getBody();
     }
 

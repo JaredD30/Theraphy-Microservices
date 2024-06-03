@@ -143,4 +143,20 @@ public class PhysiotherapistController {
             @RequestBody Double reviews) {
         return physiotherapistService.updatePhysiotherapistRating(jwt, physiotherapistsId, reviews);
     }
+
+    @PostMapping("/{physiotherapistsId}/consultationQuantity")
+    public Physiotherapist updatePhysiotherapistConsultationQuantity(
+            @RequestHeader("Authorization") String jwt,
+            @PathVariable Integer physiotherapistsId,
+            @RequestBody Integer consultationQuantity) {
+        return physiotherapistService.updatePhysiotherapistConsultationQuantity(jwt, physiotherapistsId, consultationQuantity);
+    }
+
+    @PostMapping("/{physiotherapistsId}/patientsQuantity")
+    public Physiotherapist updatePhysiotherapistPatientsQuantity(
+            @RequestHeader("Authorization") String jwt,
+            @PathVariable Integer physiotherapistsId,
+            @RequestBody Integer patientsQuantity) {
+        return physiotherapistService.updatePhysiotherapistPatientQuantity(jwt, physiotherapistsId, patientsQuantity);
+    }
 }

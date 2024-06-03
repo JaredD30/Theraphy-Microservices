@@ -140,5 +140,12 @@ public class PatientServiceImpl implements PatientService {
         return ResponseEntity.ok().build();
     }
 
+    @Override
+    public Patient updatePatientAppointmentQuantity(String jwt, Integer patientId, Integer appointmentQuantity) {
+        Patient patient = patientRepository.findPatientById(patientId);
+        patient.setAppointmentQuantity(appointmentQuantity);
+        return patientRepository.save(patient);
+    }
+
 }
 

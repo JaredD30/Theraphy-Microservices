@@ -136,6 +136,9 @@ public class ConsultationServiceImpl implements ConsultationService {
 
         System.out.printf(String.valueOf(user));
 
+        Integer consultationQ = 0;
+        Integer patientQ = 0;
+
         if (Objects.equals(String.valueOf(user.getRole()), "ADMIN") || Objects.equals(String.valueOf(user.getRole()), "PATIENT")) {
 
             Patient patient = externalConfiguration.getPatientByUserId(jwt,user.getId());
@@ -160,22 +163,21 @@ public class ConsultationServiceImpl implements ConsultationService {
             String body = mailService.buildHtmlEmail(user.getFirstname(),consultationResource.getTopic(),consultationResource.getDate(),userPhysiotherapist.getFirstname());
             try {
                 mailService.sendNewMail(user.getUsername(),"Confirmacion de Consulta",body);
+                //Aumento de la cantidad de consultas de un fisio
+                consultationQ += 1;
+                externalConfiguration.updatePhysiotherapistConsultationQuantity(jwt,consultationResource.getPhysiotherapistId(), consultationQ);
+                //Aumento de cantidad de pacientes de un fisio
+                patientQ += 1;
+                externalConfiguration.updatePhysiotherapistPatientsQuantity(jwt,consultationResource.getPhysiotherapistId(), patientQ);
+
             }catch (MessagingException e){
                 e.printStackTrace();
             }
-
             return consultationRepository.save(consultation);
         } else {
             throw new ResourceValidationException(ENTITY,
                     "Consultation not crate, because you are not a patient.");
         }
-
-
-        //Aumento de la cantidad de consultas de un fisio
-
-        //Aumento de la cantidad de consultas de un paciente
-
-        //Aumento de cantidad de pacientes de un fisio
 
     }
 

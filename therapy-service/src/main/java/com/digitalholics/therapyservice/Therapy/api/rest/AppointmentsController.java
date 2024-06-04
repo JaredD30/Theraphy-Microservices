@@ -147,8 +147,10 @@ public class AppointmentsController {
             @Parameter(hidden = true) @RequestHeader("Authorization") String jwt, @Parameter(description = "appointment Id", required = true, examples = @ExampleObject(name = "appointmentId", value = "1"))
             @PathVariable Integer appointmentId,
             @RequestBody UpdateAppointmentResource request) {
-
-        return new  ResponseEntity<>(mapper.toResource(appointmentService.update(appointmentId,request)), HttpStatus.CREATED);
+        if (jwt != null && jwt.startsWith("Bearer ")) {
+            jwt = jwt.substring(7); // Quita "Bearer " del token
+        }
+        return new  ResponseEntity<>(mapper.toResource(appointmentService.update(jwt,appointmentId,request)), HttpStatus.CREATED);
     }
 
     @Operation(summary = "Delete an appointment", description = "Delete an appointment with a provided id")

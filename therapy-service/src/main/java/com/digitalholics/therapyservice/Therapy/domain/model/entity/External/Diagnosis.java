@@ -14,8 +14,7 @@ import lombok.*;
 @Setter
 public class Diagnosis {
     private Integer id;
-    private Physiotherapist physiotherapist;
-    private Patient patient;
+    private Integer patientId;
     private String diagnosis;
     private String date;
 }

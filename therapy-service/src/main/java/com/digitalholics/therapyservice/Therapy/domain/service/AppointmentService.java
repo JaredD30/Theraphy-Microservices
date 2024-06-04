@@ -27,7 +27,7 @@ public interface AppointmentService {
 
     Appointment create(String jwt, CreateAppointmentResource appointment);
 
-    Appointment update(Integer appointmentId, UpdateAppointmentResource request);
+    Appointment update(String jwt, Integer appointmentId, UpdateAppointmentResource request);
 
     ResponseEntity<?> delete(Integer appointmentId);
 

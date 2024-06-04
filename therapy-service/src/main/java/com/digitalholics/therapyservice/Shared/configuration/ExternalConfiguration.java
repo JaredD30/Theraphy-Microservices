@@ -1,14 +1,10 @@
 package com.digitalholics.therapyservice.Shared.configuration;
 
 
-import com.digitalholics.therapyservice.Therapy.domain.model.entity.External.Consultation;
-import com.digitalholics.therapyservice.Therapy.domain.model.entity.External.Patient;
-import com.digitalholics.therapyservice.Therapy.domain.model.entity.External.Physiotherapist;
-import com.digitalholics.therapyservice.Therapy.domain.model.entity.External.User;
+import com.digitalholics.therapyservice.Therapy.domain.model.entity.External.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -91,17 +87,10 @@ public class ExternalConfiguration {
         );
 
         try {
-            // Log the response body for debugging purposes
-            System.out.println("Response JSON: " + response.getBody());
-
-            // Parse the JSON response
             JsonNode rootNode = objectMapper.readTree(response.getBody());
             JsonNode contentNode = rootNode.path("content");
-
-            // Convert the content node to a list of Consultation
             return objectMapper.readValue(contentNode.toString(), new TypeReference<List<Consultation>>() {});
         } catch (Exception e) {
-            // Log the error for debugging purposes
             e.printStackTrace();
             throw new RuntimeException("Failed to convert JSON response to List<Consultation>", e);
         }
@@ -112,6 +101,17 @@ public class ExternalConfiguration {
         HttpHeaders headers = new HttpHeaders();
         HttpEntity<String> entity = new HttpEntity<>(headers);
         ResponseEntity<User> response = restTemplate.exchange(userServiceUrl, HttpMethod.GET, entity, User.class);
+        return response.getBody();
+    }
+
+    public Diagnosis createDiagnosis (String jwt, Diagnosis diagnosis){
+        String diagnosisServiceUrl = "http://health-expertise-service/api/v1/health-expertise/diagnoses";
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + jwt);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<Diagnosis> entity = new HttpEntity<>(diagnosis, headers);
+        ResponseEntity<Diagnosis> response = restTemplate.exchange(diagnosisServiceUrl, HttpMethod.POST, entity, Diagnosis.class);
         return response.getBody();
     }
 

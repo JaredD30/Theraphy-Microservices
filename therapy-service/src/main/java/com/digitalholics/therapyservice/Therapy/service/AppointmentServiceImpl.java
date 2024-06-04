@@ -5,6 +5,7 @@ import com.digitalholics.therapyservice.Shared.Exception.ResourceValidationExcep
 import com.digitalholics.therapyservice.Shared.Exception.UnauthorizedException;
 import com.digitalholics.therapyservice.Shared.configuration.ExternalConfiguration;
 import com.digitalholics.therapyservice.Therapy.domain.model.entity.Appointment;
+import com.digitalholics.therapyservice.Therapy.domain.model.entity.External.Diagnosis;
 import com.digitalholics.therapyservice.Therapy.domain.model.entity.External.User;
 import com.digitalholics.therapyservice.Therapy.domain.model.entity.Therapy;
 import com.digitalholics.therapyservice.Therapy.domain.persistence.AppointmentRepository;
@@ -22,6 +23,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -120,6 +124,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             appointment.setHour(appointmentResource.getHour());
             appointment.setPlace(appointmentResource.getPlace());
             appointment.setTherapy(therapy);
+
             return appointmentRepository.save(appointment);
         }else {
             throw new UnauthorizedException("You do not have permission to create an appointment for this therapy.");
@@ -127,7 +132,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public Appointment update(Integer appointmentId, UpdateAppointmentResource request) {
+    public Appointment update(String jwt, Integer appointmentId, UpdateAppointmentResource request) {
         Appointment appointment = getById(appointmentId);
 
         if (request.getDone() != null) {
@@ -138,6 +143,12 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
         if (request.getDiagnosis() != null) {
             appointment.setDiagnosis(request.getDiagnosis());
+            Diagnosis diagnosis = new Diagnosis();
+            diagnosis.setDiagnosis(request.getDiagnosis());
+            diagnosis.setDate((LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))));
+            diagnosis.setPatientId(appointment.getTherapy().getPatientId());
+
+            externalConfiguration.createDiagnosis(jwt, diagnosis);
         }
         if (request.getDate() != null) {
             appointment.setDate(request.getDate());

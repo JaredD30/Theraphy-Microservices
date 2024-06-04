@@ -164,14 +164,14 @@ public class PhysiotherapistServiceImpl implements PhysiotherapistService {
     @Override
     public Physiotherapist updatePhysiotherapistConsultationQuantity(String jwt, Integer physiotherapistID, Integer consultation) {
         Physiotherapist physiotherapist = physiotherapistRepository.findPhysiotherapistById(physiotherapistID);
-        physiotherapist.setConsultationQuantity(consultation);
+        physiotherapist.setConsultationQuantity(physiotherapist.getConsultationQuantity() + consultation);
         return physiotherapistRepository.save(physiotherapist);
     }
 
     @Override
     public Physiotherapist updatePhysiotherapistPatientQuantity(String jwt, Integer physiotherapistID, Integer patientQuantity) {
         Physiotherapist physiotherapist = physiotherapistRepository.findPhysiotherapistById(physiotherapistID);
-        physiotherapist.setPatientQuantity(patientQuantity);
+        physiotherapist.setPatientQuantity(physiotherapist.getPatientQuantity() + patientQuantity);
         return physiotherapistRepository.save(physiotherapist);
     }
 

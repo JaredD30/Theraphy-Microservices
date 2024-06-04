@@ -59,6 +59,17 @@ public class ExternalConfiguration {
         return response.getBody();
     }
 
+    public Patient updatePatientsAppointmentQuantity(String jwt, Integer patientId, Integer appointmentQuantity) {
+        String patientServiceUrl = "http://profile-service/api/v1/profile/physiotherapists/" + patientId + "/patientsQuantity";
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + jwt);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<Integer> entity = new HttpEntity<>(appointmentQuantity, headers);
+        ResponseEntity<Patient> response = restTemplate.exchange(patientServiceUrl, HttpMethod.POST, entity, Patient.class);
+        return response.getBody();
+    }
+
     public Patient getPatientByID(String jwt, Integer id){
         String patientServiceUrl = "http://profile-service/api/v1/profile/patients/"+id;
         HttpHeaders headers = new HttpHeaders();

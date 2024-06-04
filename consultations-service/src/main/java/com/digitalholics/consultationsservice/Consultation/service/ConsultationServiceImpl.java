@@ -149,36 +149,52 @@ public class ConsultationServiceImpl implements ConsultationService {
             System.out.println("Este fisio: "+ physiotherapist + " Pertenese a este usuario "+ userPhysiotherapist);
 
             System.out.println(patient.getId());
+
+            List<Consultation> consultations = consultationRepository.findByPhysiotherapistId(physiotherapist.getId());
+
             Consultation consultation = new Consultation();
-            consultation.setPatientId(patient.getId());
-            consultation.setPhysiotherapistId(consultationResource.getPhysiotherapistId());
-            consultation.setDone(consultationResource.getDone());
-            consultation.setTopic(consultationResource.getTopic());
-            consultation.setDiagnosis(consultationResource.getDiagnosis());
-            consultation.setDate(consultationResource.getDate());
-            consultation.setHour(consultationResource.getHour());
-            consultation.setPlace(consultationResource.getPlace());
-
-            //Send email to the user
-            String body = mailService.buildHtmlEmail(user.getFirstname(),consultationResource.getTopic(),consultationResource.getDate(),userPhysiotherapist.getFirstname());
-            try {
-                mailService.sendNewMail(user.getUsername(),"Confirmacion de Consulta",body);
-                //Aumento de la cantidad de consultas de un fisio
-                consultationQ += 1;
-                externalConfiguration.updatePhysiotherapistConsultationQuantity(jwt,consultationResource.getPhysiotherapistId(), consultationQ);
-                //Aumento de cantidad de pacientes de un fisio
-                patientQ += 1;
-                externalConfiguration.updatePhysiotherapistPatientsQuantity(jwt,consultationResource.getPhysiotherapistId(), patientQ);
-
-            }catch (MessagingException e){
-                e.printStackTrace();
+            Boolean bolConsult = true;
+            for (Consultation existingConsultation : consultations) {
+                if (existingConsultation.getPatientId().equals(patient.getId()) && !existingConsultation.getDone()) {
+                    bolConsult = false;
+                }
             }
-            return consultationRepository.save(consultation);
-        } else {
+
+            if (bolConsult) {
+                consultation.setPatientId(patient.getId());
+                consultation.setPhysiotherapistId(consultationResource.getPhysiotherapistId());
+                consultation.setDone(consultationResource.getDone());
+                consultation.setTopic(consultationResource.getTopic());
+                consultation.setDiagnosis(consultationResource.getDiagnosis());
+                consultation.setDate(consultationResource.getDate());
+                consultation.setHour(consultationResource.getHour());
+                consultation.setPlace(consultationResource.getPlace());
+
+                //Send email to the user
+                String body = mailService.buildHtmlEmail(user.getFirstname(),consultationResource.getTopic(),consultationResource.getDate(),userPhysiotherapist.getFirstname());
+                try {
+                    mailService.sendNewMail(user.getUsername(),"Confirmacion de Consulta",body);
+                    //Aumento de la cantidad de consultas de un fisio
+                    consultationQ += 1;
+                    externalConfiguration.updatePhysiotherapistConsultationQuantity(jwt,consultationResource.getPhysiotherapistId(), consultationQ);
+                    //Aumento de cantidad de pacientes de un fisio
+                    patientQ += 1;
+                    externalConfiguration.updatePhysiotherapistPatientsQuantity(jwt,consultationResource.getPhysiotherapistId(), patientQ);
+                    externalConfiguration.updatePatientsAppointmentQuantity(jwt,patient.getId(),1);
+
+                }catch (MessagingException e){
+                    e.printStackTrace();
+                }
+                return consultationRepository.save(consultation);
+
+            }else {
+                throw new ResourceValidationException(ENTITY,
+                        "Consultation not crate, You have already a pending consultation.");
+            }
+        }else {
             throw new ResourceValidationException(ENTITY,
                     "Consultation not crate, because you are not a patient.");
         }
-
     }
 
     @Override

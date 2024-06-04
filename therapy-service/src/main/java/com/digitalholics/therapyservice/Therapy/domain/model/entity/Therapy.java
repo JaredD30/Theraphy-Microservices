@@ -34,7 +34,7 @@ public class Therapy {
     private String description;
 
 
-    private String appointmentQuantity;
+    private Integer appointmentQuantity;
 
 
     @NotNull

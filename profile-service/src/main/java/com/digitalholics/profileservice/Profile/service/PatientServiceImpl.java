@@ -143,7 +143,7 @@ public class PatientServiceImpl implements PatientService {
     @Override
     public Patient updatePatientAppointmentQuantity(String jwt, Integer patientId, Integer appointmentQuantity) {
         Patient patient = patientRepository.findPatientById(patientId);
-        patient.setAppointmentQuantity(appointmentQuantity);
+        patient.setAppointmentQuantity(patient.getAppointmentQuantity() + appointmentQuantity);
         return patientRepository.save(patient);
     }
 

@@ -3,6 +3,7 @@ package com.digitalholics.therapyservice.Therapy.service;
 import com.digitalholics.therapyservice.Shared.Exception.ResourceNotFoundException;
 import com.digitalholics.therapyservice.Shared.Exception.ResourceValidationException;
 import com.digitalholics.therapyservice.Shared.configuration.ExternalConfiguration;
+import com.digitalholics.therapyservice.Therapy.domain.model.entity.External.Consultation;
 import com.digitalholics.therapyservice.Therapy.domain.model.entity.External.Patient;
 import com.digitalholics.therapyservice.Therapy.domain.model.entity.External.Physiotherapist;
 import com.digitalholics.therapyservice.Therapy.domain.model.entity.External.User;
@@ -141,25 +142,34 @@ public class TherapyServiceImpl implements TherapyService {
         if (Objects.equals(String.valueOf(user.getRole()), "ADMIN") || Objects.equals(String.valueOf(user.getRole()), "PHYSIOTHERAPIST")) {
 
             Physiotherapist physiotherapist = externalConfiguration.getPhysiotherapistByUserId(jwt,user.getId());
-            //Patient patient =  externalConfiguration.getPatientByUserId(jwt, therapyResource.getPatientId());
-            //User userPatient = externalConfiguration.getUserById(patient.getUser().getId());
+            List<Consultation> consultation = externalConfiguration.getConsultationByPhysiotherapyId(jwt,physiotherapist.getId());
+            Boolean bolConsult = false;
+            for (Consultation existingConsultation : consultation) {
+                if (existingConsultation.getPatientId().getId().equals(therapyResource.getPatientId()) && existingConsultation.getDone()) {
+                    bolConsult = true;
+                }
+            }
 
-            //physiotherapist.getId()
-            Therapy therapy = new Therapy();
-            therapy.setTherapyName(therapyResource.getTherapyName());
-            therapy.setDescription(therapyResource.getDescription());
-            therapy.setAppointmentQuantity(therapyResource.getAppointmentQuantity());
-            therapy.setStartAt(therapyResource.getStartAt());
-            therapy.setFinishAt(therapyResource.getFinishAt());
-            therapy.setFinished(therapyResource.getFinished());
-            therapy.setPatientId(therapyResource.getPatientId());
-            therapy.setPhysiotherapistId(physiotherapist.getId());
+            if (bolConsult) {
+                Therapy therapy = new Therapy();
+                therapy.setTherapyName(therapyResource.getTherapyName());
+                therapy.setDescription(therapyResource.getDescription());
+                therapy.setAppointmentQuantity(therapyResource.getAppointmentQuantity());
+                therapy.setStartAt(therapyResource.getStartAt());
+                therapy.setFinishAt(therapyResource.getFinishAt());
+                therapy.setFinished(therapyResource.getFinished());
+                therapy.setPatientId(therapyResource.getPatientId());
+                therapy.setPhysiotherapistId(physiotherapist.getId());
 
+                return therapyRepository.save(therapy);
+            } else {
+                throw new ResourceValidationException(ENTITY,
+                        "Therapy not created, because You haven't done a consultation with physiotherapist yet.");
+            }
 
-            return therapyRepository.save(therapy);
         } else {
             throw new ResourceValidationException(ENTITY,
-                    "Appointment not created, because you are not a physiotherapist.");
+                    "Therapy not created, because you are not a physiotherapist.");
         }
 
     }

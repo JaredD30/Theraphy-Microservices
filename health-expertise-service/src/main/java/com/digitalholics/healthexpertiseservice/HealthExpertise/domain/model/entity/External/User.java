@@ -16,6 +16,6 @@ public class User{
     String lastname;
     String username;
     String password;
-    String rol;
+    String role;
 
 }

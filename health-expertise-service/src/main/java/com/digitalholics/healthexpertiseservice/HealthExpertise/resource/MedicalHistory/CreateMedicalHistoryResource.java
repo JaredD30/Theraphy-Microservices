@@ -16,4 +16,5 @@ public class CreateMedicalHistoryResource {
     private String hereditaryHistory;
     private String nonPathologicalHistory;
     private String pathologicalHistory;
+    private Integer patientId;
 }

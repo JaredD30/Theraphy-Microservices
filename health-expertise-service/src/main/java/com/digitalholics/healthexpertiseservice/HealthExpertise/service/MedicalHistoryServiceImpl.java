@@ -99,7 +99,7 @@ public class MedicalHistoryServiceImpl implements MedicalHistoryService {
 
         User user = externalConfiguration.getUser(jwt);
         MedicalHistory medicalHistory = new MedicalHistory();
-        medicalHistory.setPatientId(user.getId());
+        medicalHistory.setPatientId(medicalHistoryResource.getPatientId());
         medicalHistory.setGender(medicalHistoryResource.getGender());
         medicalHistory.setSize(medicalHistoryResource.getSize());
         medicalHistory.setWeight(medicalHistoryResource.getWeight());

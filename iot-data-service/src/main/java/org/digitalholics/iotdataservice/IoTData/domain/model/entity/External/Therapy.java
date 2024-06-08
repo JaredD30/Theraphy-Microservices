@@ -11,7 +11,7 @@ public class Therapy {
     private Integer id;
     private String therapyName;
     private String description;
-    private String appointmentQuantity;
+    private Integer appointmentQuantity;
     private String startAt;
     private String finishAt;
     private Boolean finished;

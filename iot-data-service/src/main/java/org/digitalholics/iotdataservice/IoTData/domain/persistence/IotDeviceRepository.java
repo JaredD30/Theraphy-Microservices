@@ -14,4 +14,6 @@ public interface IotDeviceRepository extends JpaRepository<IotDevice, Integer> {
     List<IotDevice>  findByTherapyId(Integer therapyId);
 
 
+
+
 }

@@ -1,6 +1,7 @@
 package org.digitalholics.iotdataservice.IoTData.api.rest;
 
 
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.digitalholics.iotdataservice.IoTData.domain.service.IotDeviceService;
 import org.digitalholics.iotdataservice.IoTData.mapping.IotDeviceMapper;
@@ -27,11 +28,14 @@ public class IotDeviceController {
     }
 
     @GetMapping
-    public Page<IotDeviceResource> getAllIoTDevices(Pageable pageable) {
-        return mapper.modelListPage(iotDeviceService.getAll(), pageable);
+    public Page<IotDeviceResource> getAllIoTDevices(@Parameter(hidden = true) @RequestHeader("Authorization") String jwt, Pageable pageable) {
+        return iotDeviceService.getAllResources(jwt, pageable);
     }
 
-
+    @GetMapping("/byPhysiotherapistId/{physiotherapistId}")
+    public Page<IotDeviceResource> getIoTDevicesByPhysiotherapistId(@Parameter(hidden = true) @RequestHeader("Authorization") String jwt, @PathVariable Integer physiotherapistId, Pageable pageable) {
+        return iotDeviceService.getAllResourcesByPhysiotherapistId(jwt,physiotherapistId, pageable);
+    }
 
     @GetMapping("{iotDeviceId}")
     public IotDeviceResource getIoTDeviceById(@PathVariable Integer iotDeviceId) {
@@ -43,6 +47,13 @@ public class IotDeviceController {
     public ResponseEntity<IotDeviceResource> createIoTDevice() {
         return new ResponseEntity<>(mapper.toResource(iotDeviceService.create()), HttpStatus.CREATED);
     }
+
+    @PostMapping("/assign/{iotDeviceId}/to/{therapyId}")
+    public ResponseEntity<IotDeviceResource> assignToTherapy(@PathVariable Integer iotDeviceId, @PathVariable Integer therapyId) {
+        return new ResponseEntity<>(mapper.toResource(iotDeviceService.assignTherapy(iotDeviceId,therapyId)), HttpStatus.CREATED);
+    }
+
+
 
     @DeleteMapping("{iotDeviceId}")
     public ResponseEntity<?> deleteIotDevice(@PathVariable Integer iotDeviceId) {

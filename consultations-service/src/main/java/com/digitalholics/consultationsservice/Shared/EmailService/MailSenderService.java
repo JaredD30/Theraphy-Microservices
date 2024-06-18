@@ -42,8 +42,8 @@ public class MailSenderService {
                 "<style>" +
                 "body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }" +
                 ".container { max-width: 600px; margin: 20px auto; padding: 20px; background-color: #ffffff; border: 1px solid #e0e0e0; }" +
-                ".header { background-color: #00a8e8; padding: 10px 20px; text-align: center; }" +
-                ".header img { max-width: 100px; margin-bottom: 10px; }" +
+                ".header { background-color: #00a8e8; padding: 10px 20px; text-align: center; display: flex; align-items: center; justify-content: space-evenly; }" +
+                ".header img { max-width: 60px; margin-right: 10px; }" +
                 ".header h1 { color: #ffffff; font-size: 24px; margin: 0; }" +
                 ".content { padding: 20px; }" +
                 ".content p { font-size: 14px; color: #333333; }" +
@@ -55,7 +55,7 @@ public class MailSenderService {
                 "<body>" +
                 "<div class='container'>" +
                 "<div class='header'>" +
-                "<img src='https://example.com/logo.png' alt='Theraphy'>" +
+                "<img src='https://github.com/upc-pre-202302-IoTheraphy-SI572-SW71/ReportAssets/blob/main/logo-image.png?raw=true' alt='Theraphy'>" +
                 "<h1>Theraphy</h1>" +
                 "</div>" +
                 "<div class='content'>" +

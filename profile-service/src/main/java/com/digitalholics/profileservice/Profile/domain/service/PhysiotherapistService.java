@@ -17,6 +17,9 @@ import java.util.List;
 public interface PhysiotherapistService {
     List<Physiotherapist> getAll();
     Page<Physiotherapist> getAll(Pageable pageable);
+
+    Page<PhysiotherapistResource> getAllPhysiotherapist(String jwt, Pageable pageable);
+
     Physiotherapist getById(Integer patientId);
 
     PhysiotherapistResource getLoggedInPhysiotherapist(String jwt);

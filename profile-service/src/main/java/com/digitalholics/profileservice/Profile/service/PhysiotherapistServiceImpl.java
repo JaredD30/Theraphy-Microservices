@@ -57,6 +57,17 @@ public class PhysiotherapistServiceImpl implements PhysiotherapistService {
     }
 
     @Override
+    public Page<PhysiotherapistResource> getAllPhysiotherapist(String jwt, Pageable pageable) {
+        Page<PhysiotherapistResource> physiotherapist =
+                mapper.modelListPage(getAll(), pageable);
+        physiotherapist.forEach(physiotherapistResource -> {
+            physiotherapistResource.setUser(externalConfiguration.getUserById(physiotherapistResource.getUser().getId()));
+        });
+
+        return physiotherapist;
+    }
+
+    @Override
     public Physiotherapist getById(Integer patientId) {
         return physiotherapistRepository.findById(patientId)
                 .orElseThrow(()-> new ResourceNotFoundException(ENTITY, patientId));    }

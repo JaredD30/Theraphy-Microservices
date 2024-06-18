@@ -45,7 +45,8 @@ public class PhysiotherapistController {
     })
     @GetMapping
     public Page<PhysiotherapistResource> getAllPPhysiotherapist( @Parameter(hidden = true) @RequestHeader("Authorization") String jwt, Pageable pageable) {
-        return mapper.modelListPage(physiotherapistService.getAll(), pageable);
+        //return mapper.modelListPage(physiotherapistService.getAll(), pageable);
+        return physiotherapistService.getAllPhysiotherapist(jwt, pageable);
     }
 
     @Operation(summary = "Get physiotherapist by id", description = "Returns physiotherapist with a provide id")

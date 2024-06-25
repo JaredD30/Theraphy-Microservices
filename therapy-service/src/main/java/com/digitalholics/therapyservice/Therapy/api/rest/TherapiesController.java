@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -45,7 +46,8 @@ public class TherapiesController {
     @GetMapping
     public Page<TherapyResource> getAllTherapies(
             @Parameter(hidden = true) @RequestHeader("Authorization") String jwt, Pageable pageable) {
-        return mapper.modelListPage(therapyService.getAll(), pageable);
+        //return mapper.modelListPage(therapyService.getAll(), pageable);
+        return therapyService.getAllResources(jwt, pageable);
     }
 
     @Operation(summary = "Get therapy by id", description = "Returns therapy with a provided id")
@@ -59,7 +61,8 @@ public class TherapiesController {
     public TherapyResource getTherapyById(
             @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
             @Parameter(description = "Therapy Id", required = true, examples = @ExampleObject(name = "therapyId", value = "1")) @PathVariable Integer therapyId) {
-        return mapper.toResource(therapyService.getById(therapyId));
+        //return mapper.toResource(therapyService.getById(therapyId));
+        return therapyService.getResourceById(jwt,therapyId);
     }
 
     @Operation(summary = "Get therapy by patient id", description = "Returns therapy with a provided patient id")
@@ -73,7 +76,8 @@ public class TherapiesController {
     public Page<TherapyResource> getTherapyByPatientId(
             @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
             @Parameter(description = "Patient Id", required = true, examples = @ExampleObject(name = "patientId", value = "1")) @PathVariable Integer patientId, Pageable pageable) {
-        return mapper.modelListPage(therapyService.getTherapyByPatientId(patientId), pageable);
+        //return mapper.modelListPage(therapyService.getTherapyByPatientId(patientId), pageable);
+        return therapyService.getResourceByPatientId(jwt,pageable,patientId);
     }
 
     @Operation(summary = "Get active therapy by jwt", description = "Returns an active therapy by jwt")
@@ -86,7 +90,12 @@ public class TherapiesController {
     @GetMapping("activeTherapyByPatientId")
     public TherapyResource getActiveTherapyByPatientId(
             @Parameter(hidden = true) @RequestHeader("Authorization") String jwt) {
-        return mapper.toResource(therapyService.getActiveTherapyByPatientId(jwt));
+       // return mapper.toResource(therapyService.getActiveTherapyByPatientId(jwt));
+
+        if (jwt != null && jwt.startsWith("Bearer ")) {
+            jwt = jwt.substring(7); // Quita "Bearer " del token
+        }
+        return therapyService.getResourceActiveByPatientId(jwt);
     }
 
     @Operation(summary = "Create therapy", description = "Register a therapy")
@@ -98,8 +107,13 @@ public class TherapiesController {
     })
     @PostMapping
     public ResponseEntity<TherapyResource> createTherapy(
-            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt, @RequestBody CreateTherapyResource resource) {
-        return new ResponseEntity<>(mapper.toResource(therapyService.create(jwt, (resource))), HttpStatus.CREATED);
+            @RequestBody CreateTherapyResource resource,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader
+    ) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            authorizationHeader = authorizationHeader.substring(7); // Quita "Bearer " del token
+        }
+        return new ResponseEntity<>(mapper.toResource(therapyService.create(authorizationHeader, (resource))), HttpStatus.CREATED);
     }
 
     @Operation(summary = "Update a therapy partially", description = "Updates a therapy partially based on the provided data")
@@ -132,5 +146,12 @@ public class TherapiesController {
         return therapyService.delete(therapyId);
     }
 
+    @GetMapping("byPhysioAndPatient/{physiotherapistId}/{patientId}")
+    public TherapyResource getTherapyByPhysiotherapistIdAndPatientId(
+            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
+            @PathVariable Integer patientId, @PathVariable Integer physiotherapistId){
+        //return mapper.toResource((therapyService.getTherapyByPhysiotherapistIdAndPatientId(physiotherapistId, patientId)));
+        return therapyService.getResourceByPhysiotherapistIdAndPatientId(jwt,physiotherapistId,patientId);
+    }
 
 }

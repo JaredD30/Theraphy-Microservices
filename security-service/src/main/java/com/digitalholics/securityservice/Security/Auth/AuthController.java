@@ -7,6 +7,7 @@ import com.digitalholics.securityservice.Security.Domain.Service.Communication.R
 import com.digitalholics.securityservice.Security.Jwt.JwtService;
 import com.digitalholics.securityservice.Security.Resource.UserResource;
 import com.digitalholics.securityservice.Security.mapping.UserMapper;
+import com.digitalholics.securityservice.Shared.Exception.ResourceValidationException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -107,7 +108,8 @@ public class AuthController {
             jwt = jwt.substring(7); // Quita los primeros 7 caracteres ("Bearer ")
         }
         String username = jwtService.validateJwtAndGetUsername(jwt);
-        return username != null ? username : jwt;
+
+        return username;
     }
 
     @GetMapping("/get-user")
@@ -118,6 +120,13 @@ public class AuthController {
         }
         User username = jwtService.validateJwtAndGetUser(jwt);
         return username != null ? mapper.toResource(username) : null;
+    }
+
+    @GetMapping("/user/{id}")
+    public UserResource getUserById(
+            @PathVariable Integer id
+    ) {
+        return mapper.toResource(authService.getByUserId(id));
     }
 
 }

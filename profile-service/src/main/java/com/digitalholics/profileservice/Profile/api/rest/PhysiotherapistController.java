@@ -2,9 +2,9 @@ package com.digitalholics.profileservice.Profile.api.rest;
 
 
 
+import com.digitalholics.profileservice.Profile.domain.model.entity.Physiotherapist;
 import com.digitalholics.profileservice.Profile.domain.service.PhysiotherapistService;
 import com.digitalholics.profileservice.Profile.mapping.PhysiotherapistMapper;
-import com.digitalholics.profileservice.Profile.resource.Patient.PatientResource;
 import com.digitalholics.profileservice.Profile.resource.Physiotherapist.CreatePhysiotherapistResource;
 import com.digitalholics.profileservice.Profile.resource.Physiotherapist.PhysiotherapistResource;
 import com.digitalholics.profileservice.Profile.resource.Physiotherapist.UpdatePhysiotherapistResource;
@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -44,7 +45,8 @@ public class PhysiotherapistController {
     })
     @GetMapping
     public Page<PhysiotherapistResource> getAllPPhysiotherapist( @Parameter(hidden = true) @RequestHeader("Authorization") String jwt, Pageable pageable) {
-        return mapper.modelListPage(physiotherapistService.getAll(), pageable);
+        //return mapper.modelListPage(physiotherapistService.getAll(), pageable);
+        return physiotherapistService.getAllPhysiotherapist(jwt, pageable);
     }
 
     @Operation(summary = "Get physiotherapist by id", description = "Returns physiotherapist with a provide id")
@@ -57,9 +59,19 @@ public class PhysiotherapistController {
     @GetMapping("{physiotherapistId}")
     //@PreAuthorize("hasAuthority('patient:read')")
     public PhysiotherapistResource getPhysiotherapistById(
-            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
-            @Parameter(description = "Physiotherapist Id", required = true, examples = @ExampleObject(name = "physiotherapistId", value = "1")) @PathVariable Integer physiotherapistId) {
-        return mapper.toResource(physiotherapistService.getById(physiotherapistId));
+            @PathVariable Integer physiotherapistId)
+    {
+        return physiotherapistService.getResourceById(physiotherapistId);
+    }
+
+    @GetMapping("/PhysiotherapistLogget")
+    public PhysiotherapistResource getPatientLogget(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader
+    ) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            authorizationHeader = authorizationHeader.substring(7); // Quita "Bearer " del token
+        }
+        return physiotherapistService.getLoggedInPhysiotherapist(authorizationHeader);
     }
 
     @Operation(summary = "Get physiotherapist by user id", description = "Returns physiotherapist with a provide user id")
@@ -86,8 +98,13 @@ public class PhysiotherapistController {
     })
     @PostMapping("registration-physiotherapist")
     public ResponseEntity<PhysiotherapistResource> createPhysiotherapist(
-            @Parameter(hidden = true) @RequestHeader("Authorization") String jwt, @RequestBody CreatePhysiotherapistResource resource) {
-        return new ResponseEntity<>(mapper.toResource(physiotherapistService.create(resource)), HttpStatus.CREATED);
+            @RequestBody CreatePhysiotherapistResource resource,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader
+    ) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            authorizationHeader = authorizationHeader.substring(7); // Quita "Bearer " del token
+        }
+        return new ResponseEntity<>(mapper.toResource(physiotherapistService.create(resource,authorizationHeader)), HttpStatus.CREATED);
     }
 
     @Operation(summary = "Update a physiotherapist partially", description = "Updates a physiotherapist partially based on the provided data")
@@ -118,5 +135,29 @@ public class PhysiotherapistController {
             @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
             @Parameter(description = "Physiotherapist Id", required = true, examples = @ExampleObject(name = "physiotherapistId", value = "1")) @PathVariable Integer physiotherapistId) {
         return physiotherapistService.delete(physiotherapistId);
+    }
+
+    @PostMapping("/{physiotherapistsId}/rating")
+    public Physiotherapist updatePhysiotherapistReviews(
+            @RequestHeader("Authorization") String jwt,
+            @PathVariable Integer physiotherapistsId,
+            @RequestBody Double reviews) {
+        return physiotherapistService.updatePhysiotherapistRating(jwt, physiotherapistsId, reviews);
+    }
+
+    @PostMapping("/{physiotherapistsId}/consultationQuantity")
+    public Physiotherapist updatePhysiotherapistConsultationQuantity(
+            @RequestHeader("Authorization") String jwt,
+            @PathVariable Integer physiotherapistsId,
+            @RequestBody Integer consultationQuantity) {
+        return physiotherapistService.updatePhysiotherapistConsultationQuantity(jwt, physiotherapistsId, consultationQuantity);
+    }
+
+    @PostMapping("/{physiotherapistsId}/patientsQuantity")
+    public Physiotherapist updatePhysiotherapistPatientsQuantity(
+            @RequestHeader("Authorization") String jwt,
+            @PathVariable Integer physiotherapistsId,
+            @RequestBody Integer patientsQuantity) {
+        return physiotherapistService.updatePhysiotherapistPatientQuantity(jwt, physiotherapistsId, patientsQuantity);
     }
 }

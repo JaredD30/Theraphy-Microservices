@@ -11,7 +11,7 @@ public class UpdateTherapyResource {
 
     private String therapyName;
     private String description;
-    private String appointmentQuantity;
+    private Integer appointmentQuantity;
 
     private String startAt;
 

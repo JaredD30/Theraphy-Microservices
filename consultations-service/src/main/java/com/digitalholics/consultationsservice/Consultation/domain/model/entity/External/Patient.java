@@ -9,11 +9,12 @@ import lombok.*;
 @Getter
 @Setter
 public class Patient {
+    Integer id;
     private String dni;
     private Integer age;
     private String photoUrl;
     private String birthdayDate;
     private Integer appointmentQuantity;
     private String location;
-    private Integer userId;
+    private User user;
 }

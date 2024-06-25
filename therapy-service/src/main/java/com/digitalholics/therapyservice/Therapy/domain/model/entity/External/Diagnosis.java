@@ -7,32 +7,14 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
-@Getter
-@Setter
-@With
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "diagnoses")
+@Getter
+@Setter
 public class Diagnosis {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
-    @ManyToOne
-    @JoinColumn(name = "physiotherapist_id")
-    @JsonIgnore
-    private Physiotherapist physiotherapist;
-
-    @ManyToOne
-    @JoinColumn(name = "patient_id")
-    @JsonIgnore
-    private Patient patient;
-
+    private Integer patientId;
     private String diagnosis;
-
-    @NotNull
-    @NotBlank
     private String date;
 }

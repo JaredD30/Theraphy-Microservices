@@ -7,5 +7,5 @@ import lombok.Setter;
 @Setter
 public class UpdateReviewResource {
     private String content;
-    private Integer score;
+    private Double score;
 }

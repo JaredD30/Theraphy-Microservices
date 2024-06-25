@@ -1,6 +1,6 @@
 package com.digitalholics.healthexpertiseservice.HealthExpertise.resource.MedicalHistory;
 
-import com.digitalholics.healthexpertiseservice.HealthExpertise.resource.External.PatientResource;
+import com.digitalholics.healthexpertiseservice.HealthExpertise.domain.model.entity.External.Patient;
 import lombok.*;
 
 @Getter
@@ -11,7 +11,7 @@ import lombok.*;
 public class MedicalHistoryResource {
 
     private Integer id;
-    private PatientResource patient;
+    private Patient patient;
     private String gender;
     private Double size;
     private Double weight;

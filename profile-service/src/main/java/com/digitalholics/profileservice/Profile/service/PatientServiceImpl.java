@@ -5,25 +5,22 @@ import com.digitalholics.profileservice.Profile.domain.model.entity.External.Use
 import com.digitalholics.profileservice.Profile.domain.model.entity.Patient;
 import com.digitalholics.profileservice.Profile.domain.persistence.PatientRepository;
 import com.digitalholics.profileservice.Profile.domain.service.PatientService;
+import com.digitalholics.profileservice.Profile.mapping.PatientMapper;
 import com.digitalholics.profileservice.Profile.resource.Patient.CreatePatientResource;
+import com.digitalholics.profileservice.Profile.resource.Patient.PatientResource;
 import com.digitalholics.profileservice.Profile.resource.Patient.UpdatePatientResource;
 import com.digitalholics.profileservice.Shared.Exception.ResourceNotFoundException;
 import com.digitalholics.profileservice.Shared.Exception.ResourceValidationException;
+import com.digitalholics.profileservice.Shared.configuration.ExternalConfiguration;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
-import jakarta.ws.rs.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -31,16 +28,18 @@ import java.util.Set;
 @Service
 public class PatientServiceImpl implements PatientService {
 
-;    private static final String ENTITY = "Patient";
+    private static final String ENTITY = "Patient";
     private final PatientRepository patientRepository;
     private final Validator validator;
-
-
+    private final ExternalConfiguration externalConfiguration;
+    private final PatientMapper mapper;
 
     @Autowired
-    public PatientServiceImpl(PatientRepository patientRepository,Validator validator) {
+    public PatientServiceImpl(PatientRepository patientRepository, Validator validator, ExternalConfiguration externalConfiguration, PatientMapper mapper) {
         this.patientRepository = patientRepository;
         this.validator = validator;
+        this.externalConfiguration = externalConfiguration;
+        this.mapper = mapper;
     }
 
     @Override
@@ -55,6 +54,28 @@ public class PatientServiceImpl implements PatientService {
     }
 
     @Override
+    public PatientResource getResourceById(Integer patientId) {
+        Patient patient = getById(patientId);
+        PatientResource patientResource = mapper.toResource(patient);
+        User user = externalConfiguration.getUserById(patient.getUserId());
+        patientResource.setUser(user);
+        return patientResource;
+    }
+
+    @Override
+    public PatientResource getLoggedInPatient(String jwt) {
+        User user = externalConfiguration.getUser(jwt);
+        if (Objects.equals(String.valueOf(user.getRole()), "ADMIN") || Objects.equals(String.valueOf(user.getRole()), "PATIENT")) {
+            Optional<Patient> patientOptional = patientRepository.findByUserId(user.getId());
+            Patient patient = patientOptional.orElseThrow(() -> new ResourceNotFoundException("No se encontró un paciente autenticado."));
+            PatientResource patientResource  = mapper.toResource(patient);
+            patientResource.setUser(user);
+            return patientResource;
+        }
+        throw new ResourceNotFoundException("No se encontró un paciente autenticado.");
+    }
+
+    @Override
     public Patient getByDni(String dni) {
         return patientRepository.findPatientByDni(dni);
     }
@@ -66,7 +87,7 @@ public class PatientServiceImpl implements PatientService {
     }
 
     @Override
-    public Patient create(CreatePatientResource patientResource) {
+    public Patient create(CreatePatientResource patientResource, String jwt) {
 
         Set<ConstraintViolation<CreatePatientResource>> violations = validator.validate(patientResource);
 
@@ -79,17 +100,25 @@ public class PatientServiceImpl implements PatientService {
             throw new ResourceValidationException(ENTITY,
                     "A patient with the same Dni first name already exists.");
 
-        Patient patient = new Patient();
-        patient.setAge(patientResource.getAge());
-        patient.setDni(patientResource.getDni());
-        patient.setLocation(patientResource.getLocation());
-        patient.setBirthdayDate(patientResource.getBirthdayDate());
-        patient.setPhotoUrl(patientResource.getPhotoUrl());
-        patient.setAppointmentQuantity(0);
-        patient.setUserId(patientResource.getUserId());
+        User user = externalConfiguration.getUser(jwt);
 
-        return patientRepository.save(patient);
+        System.out.printf(String.valueOf(user));
 
+        if (Objects.equals(String.valueOf(user.getRole()), "ADMIN") || Objects.equals(String.valueOf(user.getRole()), "PATIENT")) {
+            Patient patient = new Patient();
+            patient.setAge(patientResource.getAge());
+            patient.setDni(patientResource.getDni());
+            patient.setLocation(patientResource.getLocation());
+            patient.setBirthdayDate(patientResource.getBirthdayDate());
+            patient.setPhotoUrl(patientResource.getPhotoUrl());
+            patient.setAppointmentQuantity(0);
+            patient.setUserId(user.getId());
+
+            return patientRepository.save(patient);
+        } else {
+            throw new ResourceValidationException(ENTITY,
+                    "Patient not crate, because you are not a patient.");
+        }
     }
 
     @Override
@@ -109,6 +138,13 @@ public class PatientServiceImpl implements PatientService {
         Patient patient = patientRepository.findPatientById(patientId);
         patientRepository.delete(patient);
         return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public Patient updatePatientAppointmentQuantity(String jwt, Integer patientId, Integer appointmentQuantity) {
+        Patient patient = patientRepository.findPatientById(patientId);
+        patient.setAppointmentQuantity(patient.getAppointmentQuantity() + appointmentQuantity);
+        return patientRepository.save(patient);
     }
 
 }

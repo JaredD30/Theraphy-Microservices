@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +29,7 @@ import java.util.List;
 @RequestMapping(value = "/api/v1/profile/patients", produces = "application/json")
 @Tag(name = "Patients", description = "Patients operations: profile, listing, retrieval, validation, registration, update, and deletion")
 public class PatientsController {
+
     private final PatientService patientService;
 
     private final PatientMapper mapper;
@@ -46,9 +48,19 @@ public class PatientsController {
     })
     @GetMapping("{patientId}")
     public PatientResource getPatientById(
-            @Parameter(description = "Patient Id", required = true, examples = @ExampleObject(name = "patientId", value = "1")) @PathVariable Integer patientId
+            @PathVariable Integer patientId
     ) {
-        return mapper.toResource(patientService.getById( patientId));
+        return patientService.getResourceById(patientId);
+    }
+
+    @GetMapping("/PatientLogget")
+    public PatientResource getPatientLogget(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader
+    ) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            authorizationHeader = authorizationHeader.substring(7); // Quita "Bearer " del token
+        }
+        return patientService.getLoggedInPatient(authorizationHeader);
     }
 
     @Operation(summary = "Get patient by user id", description = "Returns patient with a provide user id")
@@ -73,9 +85,13 @@ public class PatientsController {
     })
     @PostMapping("registration-patient")
     public ResponseEntity<PatientResource> createPatient(
-            @RequestBody CreatePatientResource resource
+            @RequestBody CreatePatientResource resource,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader
     ) {
-        return new ResponseEntity<>(mapper.toResource(patientService.create(resource)), HttpStatus.CREATED);
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            authorizationHeader = authorizationHeader.substring(7); // Quita "Bearer " del token
+        }
+        return new ResponseEntity<>(mapper.toResource(patientService.create(resource, authorizationHeader)), HttpStatus.CREATED);
     }
 
     @Operation(summary = "Update a patient partially", description = "Updates a patient with a provided patient id")
@@ -105,4 +121,13 @@ public class PatientsController {
             @Parameter(description = "Patient Id", required = true, examples = @ExampleObject(name = "patientId", value = "1")) @PathVariable Integer patientId) {
         return patientService.delete(patientId);
     }
+
+    @PostMapping("/{patientId}/appointmentQuantity")
+    public Patient updatePhysiotherapistPatientsQuantity(
+            @RequestHeader("Authorization") String jwt,
+            @PathVariable Integer patientId,
+            @RequestBody Integer appointmentQuantity) {
+        return patientService.updatePatientAppointmentQuantity(jwt, patientId, appointmentQuantity);
+    }
+
 }

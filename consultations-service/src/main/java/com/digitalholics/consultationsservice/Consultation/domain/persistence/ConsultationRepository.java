@@ -19,4 +19,5 @@ public interface ConsultationRepository extends JpaRepository<Consultation, Inte
     List<Consultation> findByPhysiotherapistId(Integer physiotherapistId);
 
 
+
 }

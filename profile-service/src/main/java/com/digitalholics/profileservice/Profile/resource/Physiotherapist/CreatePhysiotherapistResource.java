@@ -20,5 +20,4 @@ public class CreatePhysiotherapistResource
     private Integer patientQuantity;
     private Integer yearsExperience;
     private Double fees;
-    private Integer userId;
 }

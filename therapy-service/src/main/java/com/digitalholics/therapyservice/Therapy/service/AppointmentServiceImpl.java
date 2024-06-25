@@ -3,15 +3,16 @@ package com.digitalholics.therapyservice.Therapy.service;
 import com.digitalholics.therapyservice.Shared.Exception.ResourceNotFoundException;
 import com.digitalholics.therapyservice.Shared.Exception.ResourceValidationException;
 import com.digitalholics.therapyservice.Shared.Exception.UnauthorizedException;
-import com.digitalholics.therapyservice.Shared.JwtValidation.JwtValidator;
+import com.digitalholics.therapyservice.Shared.configuration.ExternalConfiguration;
 import com.digitalholics.therapyservice.Therapy.domain.model.entity.Appointment;
 import com.digitalholics.therapyservice.Therapy.domain.model.entity.External.Diagnosis;
 import com.digitalholics.therapyservice.Therapy.domain.model.entity.External.User;
 import com.digitalholics.therapyservice.Therapy.domain.model.entity.Therapy;
 import com.digitalholics.therapyservice.Therapy.domain.persistence.AppointmentRepository;
-import com.digitalholics.therapyservice.Therapy.domain.persistence.External.DiagnosisRepository;
 import com.digitalholics.therapyservice.Therapy.domain.persistence.TherapyRepository;
 import com.digitalholics.therapyservice.Therapy.domain.service.AppointmentService;
+import com.digitalholics.therapyservice.Therapy.mapping.AppointmentMapper;
+import com.digitalholics.therapyservice.Therapy.resource.Appointment.AppointmentResource;
 import com.digitalholics.therapyservice.Therapy.resource.Appointment.CreateAppointmentResource;
 import com.digitalholics.therapyservice.Therapy.resource.Appointment.UpdateAppointmentResource;
 import jakarta.validation.ConstraintViolation;
@@ -20,11 +21,11 @@ import jakarta.ws.rs.NotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -36,16 +37,18 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     private final AppointmentRepository appointmentRepository;
     private final TherapyRepository therapyRepository;
-    private final DiagnosisRepository diagnosisRepository;
-    private final JwtValidator jwtValidator;
     private final Validator validator;
+    private final ExternalConfiguration externalConfiguration;
 
-    public AppointmentServiceImpl(AppointmentRepository appointmentRepository, TherapyRepository therapyRepository, DiagnosisRepository diagnosisRepository, JwtValidator jwtValidator, Validator validator) {
+    private final AppointmentMapper mapper;
+
+    public AppointmentServiceImpl(AppointmentRepository appointmentRepository, TherapyRepository therapyRepository, Validator validator, ExternalConfiguration externalConfiguration, AppointmentMapper mapper) {
         this.appointmentRepository = appointmentRepository;
         this.therapyRepository = therapyRepository;
-        this.diagnosisRepository = diagnosisRepository;
-        this.jwtValidator = jwtValidator;
+
         this.validator = validator;
+        this.externalConfiguration = externalConfiguration;
+        this.mapper = mapper;
     }
 
     @Override
@@ -59,13 +62,43 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
+    public Page<AppointmentResource> getAllResources(String jwt, Pageable pageable) {
+        Page<AppointmentResource> appointments =
+                mapper.modelListPage(getAll(), pageable);
+        appointments.forEach(appointment -> {
+            appointment.getTherapy().setPatient(externalConfiguration.getPatientByID(jwt, appointment.getTherapy().getPatient().getId()));
+            appointment.getTherapy().setPhysiotherapist(externalConfiguration.getPhysiotherapistById(jwt, appointment.getTherapy().getPhysiotherapist().getId()));
+        });
+        return appointments;
+    }
+
+    @Override
     public Appointment getById(Integer appointmentId) {
         return appointmentRepository.findById(appointmentId).orElseThrow(() -> new ResourceNotFoundException(ENTITY, appointmentId));
     }
 
     @Override
+    public AppointmentResource getResourceById(String jwt, Integer appointmentId) {
+        AppointmentResource appointment = mapper.toResource(getById(appointmentId));
+        appointment.getTherapy().setPatient(externalConfiguration.getPatientByID(jwt, appointment.getTherapy().getPatient().getId()));
+        appointment.getTherapy().setPhysiotherapist(externalConfiguration.getPhysiotherapistById(jwt, appointment.getTherapy().getPhysiotherapist().getId()));
+        return appointment;
+    }
+
+    @Override
     public List<Appointment> getAppointmentByTherapyId(Integer therapyId) {
         return appointmentRepository.findAppointmentByTherapyId(therapyId);
+    }
+
+    @Override
+    public Page<AppointmentResource> getResourcesByTherapyId(String jwt, Pageable pageable, Integer theraphyId) {
+        Page<AppointmentResource> appointments =
+                mapper.modelListPage(getAppointmentByTherapyId(theraphyId), pageable);
+        appointments.forEach(appointment -> {
+            appointment.getTherapy().setPatient(externalConfiguration.getPatientByID(jwt, appointment.getTherapy().getPatient().getId()));
+            appointment.getTherapy().setPhysiotherapist(externalConfiguration.getPhysiotherapistById(jwt, appointment.getTherapy().getPhysiotherapist().getId()));
+        });
+        return appointments;
     }
 
     @Override
@@ -75,20 +108,15 @@ public class AppointmentServiceImpl implements AppointmentService {
         if(!violations.isEmpty())
             throw new ResourceValidationException(ENTITY, violations);
 
-        Appointment appointmentWithTopic = appointmentRepository.findByTopic(appointmentResource.getTopic());
-
-        User user = jwtValidator.validateJwtAndGetUser(jwt, "PHYSIOTHERAPIST");
-
-        if(appointmentWithTopic != null)
-            throw new ResourceValidationException(ENTITY,
-                    "A Appointment with the same topic already exists.");
+        User user = externalConfiguration.getUser(jwt);
 
         Optional<Therapy> therapyOptional = therapyRepository.findById(appointmentResource.getTherapyId());
 
-        Therapy therapy = therapyOptional.orElseThrow(()-> new NotFoundException("This therapy not found with ID: "+ appointmentResource.getTherapyId()));
+        Therapy therapy = therapyOptional.orElseThrow(() -> new NotFoundException("Therapy not found with ID: " + appointmentResource.getTherapyId()));
+
         Appointment appointment = new Appointment();
 
-        if (therapy.getPatient().getUser().getUsername().equals(user.getUsername()) || therapy.getPhysiotherapist().getUser().getUsername().equals(user.getUsername())){
+        if (externalConfiguration.getPhysiotherapistById(jwt, therapy.getPhysiotherapistId()).getUser().getUsername().equals(user.getUsername())){
             appointment.setDone(appointmentResource.getDone());
             appointment.setTopic(appointmentResource.getTopic());
             appointment.setDiagnosis(appointmentResource.getDiagnosis());
@@ -96,6 +124,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             appointment.setHour(appointmentResource.getHour());
             appointment.setPlace(appointmentResource.getPlace());
             appointment.setTherapy(therapy);
+
             return appointmentRepository.save(appointment);
         }else {
             throw new UnauthorizedException("You do not have permission to create an appointment for this therapy.");
@@ -103,7 +132,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public Appointment update(Integer appointmentId, UpdateAppointmentResource request) {
+    public Appointment update(String jwt, Integer appointmentId, UpdateAppointmentResource request) {
         Appointment appointment = getById(appointmentId);
 
         if (request.getDone() != null) {
@@ -114,6 +143,12 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
         if (request.getDiagnosis() != null) {
             appointment.setDiagnosis(request.getDiagnosis());
+            Diagnosis diagnosis = new Diagnosis();
+            diagnosis.setDiagnosis(request.getDiagnosis());
+            diagnosis.setDate((LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))));
+            diagnosis.setPatientId(appointment.getTherapy().getPatientId());
+
+            externalConfiguration.createDiagnosis(jwt, diagnosis);
         }
         if (request.getDate() != null) {
             appointment.setDate(request.getDate());
@@ -144,8 +179,31 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
+    public Page<AppointmentResource> getResourcesByPatientId(String jwt, Pageable pageable, Integer patientId) {
+        Page<AppointmentResource> appointments =
+                mapper.modelListPage(getAppointmentsByTherapyByPatientId(patientId), pageable);
+        appointments.forEach(appointment -> {
+            appointment.getTherapy().setPatient(externalConfiguration.getPatientByID(jwt, appointment.getTherapy().getPatient().getId()));
+            appointment.getTherapy().setPhysiotherapist(externalConfiguration.getPhysiotherapistById(jwt, appointment.getTherapy().getPhysiotherapist().getId()));
+        });
+        return appointments;
+    }
+
+
+    @Override
     public List<Appointment> getAppointmentsByTherapyByPhysiotherapistId(Integer physiotherapistId) {
         return appointmentRepository.findAppointmentsByTherapyByPhysiotherapistId(physiotherapistId);
+    }
+
+    @Override
+    public Page<AppointmentResource> getResourcesByPhysiotherapistId(String jwt, Pageable pageable, Integer physiotherapistId) {
+        Page<AppointmentResource> appointments =
+                mapper.modelListPage(getAppointmentsByTherapyByPhysiotherapistId(physiotherapistId), pageable);
+        appointments.forEach(appointment -> {
+            appointment.getTherapy().setPatient(externalConfiguration.getPatientByID(jwt, appointment.getTherapy().getPatient().getId()));
+            appointment.getTherapy().setPhysiotherapist(externalConfiguration.getPhysiotherapistById(jwt, appointment.getTherapy().getPhysiotherapist().getId()));
+        });
+        return appointments;
     }
 
     @Override
@@ -154,24 +212,32 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public Appointment updateDiagnosis(Integer appointmentId, String diagnosis) {
-        Appointment appointment = getById(appointmentId);
-
-        if (diagnosis != null) {
-            appointment.setDiagnosis(diagnosis);
-        }
-        if (!appointment.getDone()) {
-            appointment.setDone(true);
-        }
-
-        Diagnosis diagnosisResource = new Diagnosis();
-        diagnosisResource.setDiagnosis(diagnosis);
-        diagnosisResource.setPatient(appointment.getTherapy().getPatient());
-        diagnosisResource.setPhysiotherapist(appointment.getTherapy().getPhysiotherapist());
-        diagnosisResource.setDate(String.valueOf(LocalDate.now()));
-
-        diagnosisRepository.save(diagnosisResource);
-
-        return appointmentRepository.save(appointment);
+    public AppointmentResource getResourceByDateAndTherapyId(String jwt, Integer therapyId, String date) {
+        AppointmentResource  appointment = mapper.toResource(getAppointmentByDateAndTherapyId(therapyId, date));
+        appointment.getTherapy().setPatient(externalConfiguration.getPatientByID(jwt, appointment.getTherapy().getPatient().getId()));
+        appointment.getTherapy().setPhysiotherapist(externalConfiguration.getPhysiotherapistById(jwt, appointment.getTherapy().getPhysiotherapist().getId()));
+        return appointment;
     }
+
+//    @Override
+//    public Appointment updateDiagnosis(Integer appointmentId, String diagnosis) {
+//        Appointment appointment = getById(appointmentId);
+//
+//        if (diagnosis != null) {
+//            appointment.setDiagnosis(diagnosis);
+//        }
+//        if (!appointment.getDone()) {
+//            appointment.setDone(true);
+//        }
+//
+//        Diagnosis diagnosisResource = new Diagnosis();
+//        diagnosisResource.setDiagnosis(diagnosis);
+//        diagnosisResource.setPatient(appointment.getTherapy().getPatient());
+//        diagnosisResource.setPhysiotherapist(appointment.getTherapy().getPhysiotherapist());
+//        diagnosisResource.setDate(String.valueOf(LocalDate.now()));
+//
+//        diagnosisRepository.save(diagnosisResource);
+//
+//        return appointmentRepository.save(appointment);
+//    }
 }

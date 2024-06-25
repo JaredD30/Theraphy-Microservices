@@ -1,7 +1,7 @@
 package com.digitalholics.healthexpertiseservice.HealthExpertise.mapping;
 
 import com.digitalholics.healthexpertiseservice.HealthExpertise.domain.model.entity.Diagnosis;
-import com.digitalholics.healthexpertiseservice.HealthExpertise.resource.DiagnosisResource;
+import com.digitalholics.healthexpertiseservice.HealthExpertise.resource.Diagnosis.DiagnosisResource;
 import com.digitalholics.healthexpertiseservice.Shared.EnhancedModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

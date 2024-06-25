@@ -18,5 +18,8 @@ public interface CertificationService {
 
     Certification create(String jwt, CreateCertificationResource certification);
     Certification update(String jwt, Integer certificationId, UpdateCertificationResource request);
+
+    Certification updateTitleSchoolYear(String jwt, Integer certificationId, UpdateCertificationResource request);
+
     ResponseEntity<?> delete(String jwt, Integer certificationId);
 }

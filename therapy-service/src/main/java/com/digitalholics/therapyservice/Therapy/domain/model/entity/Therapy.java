@@ -26,7 +26,6 @@ public class Therapy {
 
     @NotNull
     @NotBlank
-    @Column(name = "therapy_name")
     @Size(max = 300)
     private String therapyName;
 
@@ -35,32 +34,22 @@ public class Therapy {
     private String description;
 
 
-    @Column(name = "appointment_quantity")
-    private String appointmentQuantity;
+    private Integer appointmentQuantity;
 
 
     @NotNull
     @NotBlank
-    @Column(name = "start_at")
     private String startAt;
 
     @NotNull
     @NotBlank
-    @Column(name = "finish_at")
     private String finishAt;
 
     @NotNull
     private Boolean finished;
 
+    private Integer physiotherapistId;
 
-    @ManyToOne
-    @JoinColumn(name = "patient_id")
-    @JsonIgnore
-    private Patient patient;
-
-    @ManyToOne
-    @JoinColumn(name = "physiotherapist_id")
-    @JsonIgnore
-    private Physiotherapist physiotherapist;
+    private Integer patientId;
 
 }

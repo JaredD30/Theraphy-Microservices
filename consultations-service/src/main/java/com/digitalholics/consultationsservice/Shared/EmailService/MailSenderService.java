@@ -9,19 +9,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.client.RestTemplate;
 
-@Service
+@Component
 public class MailSenderService {
-    @Autowired
-    private JavaMailSender mailSender;
 
-    @Autowired
-    private RestTemplate restTemplate;
+    private final JavaMailSender mailSender;
+
+    public MailSenderService(JavaMailSender mailSender) {
+        this.mailSender = mailSender;
+    }
 
     public void sendNewMail(String to, String subject, String body) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
@@ -40,8 +42,8 @@ public class MailSenderService {
                 "<style>" +
                 "body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }" +
                 ".container { max-width: 600px; margin: 20px auto; padding: 20px; background-color: #ffffff; border: 1px solid #e0e0e0; }" +
-                ".header { background-color: #00a8e8; padding: 10px 20px; text-align: center; }" +
-                ".header img { max-width: 100px; margin-bottom: 10px; }" +
+                ".header { background-color: #00a8e8; padding: 10px 20px; text-align: center; display: flex; align-items: center; justify-content: space-evenly; }" +
+                ".header img { max-width: 60px; margin-right: 10px; }" +
                 ".header h1 { color: #ffffff; font-size: 24px; margin: 0; }" +
                 ".content { padding: 20px; }" +
                 ".content p { font-size: 14px; color: #333333; }" +
@@ -53,7 +55,7 @@ public class MailSenderService {
                 "<body>" +
                 "<div class='container'>" +
                 "<div class='header'>" +
-                "<img src='https://example.com/logo.png' alt='Theraphy'>" +
+                "<img src='https://github.com/upc-pre-202302-IoTheraphy-SI572-SW71/ReportAssets/blob/main/logo-image.png?raw=true' alt='Theraphy'>" +
                 "<h1>Theraphy</h1>" +
                 "</div>" +
                 "<div class='content'>" +
@@ -72,15 +74,5 @@ public class MailSenderService {
                 "</div>" +
                 "</body>" +
                 "</html>";
-    }
-
-    public User getUser(String jwt) {
-        String userServiceUrl = "http://localhost:8080/api/v1/security/auth/get-user";
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + jwt);
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-
-        ResponseEntity<User> response = restTemplate.exchange(userServiceUrl, HttpMethod.GET, entity, User.class);
-        return response.getBody();
     }
 }
